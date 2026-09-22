@@ -1,0 +1,3899 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Pump App</title>
+<meta name="apple-mobile-web-app-title" content="Pump App">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0f0f0f">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+*{box-sizing:border-box}
+i{font-style:normal}
+body{margin:0;background:#0f0f0f;color:#f5f5f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;min-height:100vh;-webkit-tap-highlight-color:transparent}
+:root{--g-bg:#0f0f0f;--g-surf:#1c1c1c;--g-surf2:#252525;--g-text:#f5f5f5;--g-text2:#aaa;--g-muted:#666;--g-border:#333}
+.gym-wrap{max-width:520px;margin:0 auto;padding:1rem 1rem 3rem}
+.gym-topbar{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.gym-topbar i{font-size:20px;color:var(--g-text2);cursor:pointer}
+.gym-brand{font-size:11px;color:var(--g-muted);letter-spacing:0.6px;text-transform:uppercase;margin-bottom:6px;font-weight:500}
+.gym-title{font-size:18px;font-weight:600;flex:1}
+.gym-fab{position:relative;width:52px;height:52px;border-radius:50%;border:none;display:flex;align-items:center;justify-content:center;font-size:24px;color:#fff;cursor:pointer;margin:0 auto}
+.gym-fab-small{width:38px;height:38px;font-size:18px;margin:0}
+.gym-card{background:var(--g-surf);border:1px solid var(--g-border);border-radius:12px;padding:14px 16px;margin-bottom:10px;cursor:pointer}
+.gym-card:active{border-color:var(--g-text2)}
+.gym-chip{display:inline-flex;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:500;margin:2px}
+.gym-input,.gym-select,.gym-textarea{width:100%;background:var(--g-surf2);border:1px solid var(--g-border);color:var(--g-text);border-radius:8px;padding:10px;font-size:16px;box-sizing:border-box;margin-bottom:8px;font-family:inherit}
+.gym-textarea{resize:vertical;font-size:12px;font-family:monospace}
+.gym-btn{border:1px solid var(--g-border);background:var(--g-surf2);color:var(--g-text);border-radius:8px;padding:10px 14px;font-size:14px;cursor:pointer}
+.gym-btn-primary{color:#fff;border:none}
+.gym-btn-danger{color:#fff;border:none;background:#993c1d}
+.gym-btn-toggle{border:1px solid var(--g-border);background:var(--g-surf2);color:var(--g-text2);border-radius:8px;padding:8px 12px;font-size:13px;cursor:pointer}
+.gym-btn-toggle.on{color:#fff;border-color:transparent}
+.gym-label{font-size:12px;color:var(--g-text2);margin-bottom:4px;display:block}
+.gym-footer{display:flex;justify-content:center;margin-top:16px;padding-top:12px;border-top:1px solid var(--g-border)}
+.gym-empty{text-align:center;padding:60px 0}
+.gym-empty p{color:var(--g-muted);font-size:14px;margin-bottom:20px}
+.gym-tag{background:#181818;border:1px solid var(--g-border);border-radius:8px;padding:8px 10px;font-size:12px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.gym-tag i{cursor:pointer;color:var(--g-muted);font-size:16px}
+.gym-tag.dragging{opacity:0.35}
+.gym-draghandle{cursor:grab;touch-action:none}
+.gym-exrow{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--g-border);gap:8px}
+.gym-exrow.dragging{opacity:0.35}
+.gym-day-chip{display:inline-flex;padding:5px 11px;border-radius:16px;font-size:12px;margin:3px 4px 3px 0;cursor:pointer;border:1px solid var(--g-border);background:var(--g-surf2);color:var(--g-text2)}
+.gym-day-chip.sel{color:#fff;border-color:transparent}
+.gym-serie-input{width:52px;text-align:center;background:var(--g-surf2);border:1px solid var(--g-border);color:var(--g-text);border-radius:6px;padding:8px 4px;font-size:14px}
+.gym-serie-input.done{border-color:#5DCAA5;background:#0f2b22;color:#9FE1CB}
+.gym-slot{text-align:center}
+.gym-slot-labels{display:flex;gap:4px;justify-content:center;margin-bottom:2px}
+.gym-slot-labels span{font-size:9px;color:var(--g-muted);width:52px}
+.gym-prevchip{font-size:13px;font-weight:500;color:#fff;background:#3d3567;border-radius:6px;padding:4px 8px;margin-top:5px;cursor:pointer;white-space:nowrap}
+.gym-note-badge{font-size:11px;color:var(--g-muted);font-style:italic;margin-top:2px}
+.gym-settings-link{font-size:11px;color:var(--g-muted);cursor:pointer;text-decoration:underline}
+.gym-card-actions{display:flex;gap:12px;align-items:center}
+.gym-setpill{display:inline-flex;align-items:center;gap:6px;background:#181818;border:1px solid var(--g-border);border-radius:16px;padding:5px 12px;font-size:13px;margin:3px 4px 3px 0}
+.storage-warn{background:#412402;color:#FAC775;font-size:12px;padding:8px 10px;border-radius:8px;margin-bottom:12px;display:none}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
+</style>
+</head>
+<body>
+<div class="gym-wrap">
+  <h1 class="sr-only">Pump App: gestisci schede allenamento, registra sessioni con reps, peso e note, riordina esercizi trascinandoli, visualizza trend di serie e pesi, esporta o importa i dati.</h1>
+  <div id="storageWarn" class="storage-warn">Il browser blocca il salvataggio locale (localStorage): i dati non verranno mantenuti alla chiusura.</div>
+  <div id="gym-root"></div>
+</div>
+<script>
+(function(){
+const COLORS = [
+  {name:'viola', main:'#7F77DD', dark:'#26215C', bg:'#1a1830'},
+  {name:'verde', main:'#5DCAA5', dark:'#04342C', bg:'#0f2420'},
+  {name:'rosso', main:'#E24B4A', dark:'#501313', bg:'#2a1414'},
+  {name:'ambra', main:'#EF9F27', dark:'#412402', bg:'#2a1c08'},
+  {name:'verde scuro', main:'#639922', dark:'#173404', bg:'#1a2408'}
+];
+const DAYS = ['Lunedì','Martedì','Mercoledì','Giovedì','Venerdì','Sabato','Domenica'];
+function S(rep,kg){ return {rep:rep, kg:kg}; }
+function ts(m,d){ return Date.UTC(2026, m-1, d); }
+function ds(d,mon){ return d+' '+mon+' 2026'; }
+const REPS_COLOR = '#3987e5';
+const KG_COLOR = '#d95926';
+const APP_VERSION = 'v2.2 \u00b7 19 set 2026';
+
+const IMPORT_TEMPLATE = {
+  schede: [
+    {
+      id: 1,
+      nome: 'Nome scheda',
+      giorni: ['Lunedì'],
+      color: 0,
+      esercizi: [
+        {id: 1, nome: 'Nome esercizio', tipo: 'reps', serie: 3, reps: 10, riposo: 60},
+        {id: 2, nome: 'Esercizio a tempo (es. plank)', tipo: 'tempo', serie: 3, reps: 45, riposo: 45}
+      ]
+    }
+  ],
+  sessioni: []
+};
+
+const DEFAULT_DATA = {
+  "schede": [
+    {
+      "id": 1001,
+      "nome": "Upper A (Volume)",
+      "giorni": [
+        "Lunedì"
+      ],
+      "color": 0,
+      "esercizi": [
+        {
+          "id": 101,
+          "nome": "Chest press piana (macchina)",
+          "tipo": "reps",
+          "serie": 4,
+          "reps": 10,
+          "riposo": 90
+        },
+        {
+          "id": 102,
+          "nome": "Rematore chest-supported (macchina)",
+          "tipo": "reps",
+          "serie": 4,
+          "reps": 10,
+          "riposo": 90
+        },
+        {
+          "id": 103,
+          "nome": "Military press (macchina)",
+          "tipo": "reps",
+          "serie": 3,
+          "reps": 12,
+          "riposo": 75
+        },
+        {
+          "id": 104,
+          "nome": "Lat machine presa larga",
+          "tipo": "reps",
+          "serie": 3,
+          "reps": 12,
+          "riposo": 75
+        },
+        {
+          "id": 105,
+          "nome": "Curl bicipiti (concentrazione, un braccio)",
+          "tipo": "reps",
+          "serie": 3,
+          "reps": 12,
+          "riposo": 60
+        },
+        {
+          "id": 106,
+          "nome": "Push down tricipiti",
+          "tipo": "reps",
+          "serie": 3,
+          "reps": 12,
+          "riposo": 60
+        },
+        {
+          "id": 107,
+          "nome": "Plank",
+          "tipo": "tempo",
+          "serie": 3,
+          "reps": 45,
+          "riposo": 45
+        }
+      ]
+    },
+    {
+      "id": 1002,
+      "nome": "Lower",
+      "giorni": [
+        "Martedì"
+      ],
+      "color": 1,
+      "esercizi": [
+        {
+          "id": 201,
+          "nome": "Stacco rumeno (RDL)",
+          "tipo": "reps",
+          "serie": 4,
+          "reps": 10,
+          "riposo": 120
+        },
+        {
+          "id": 202,
+          "nome": "Leg press",
+          "tipo": "reps",
+          "serie": 3,
+          "reps": 12,
+          "riposo": 90
+        },
+        {
+          "id": 203,
+          "nome": "Leg curl",
+          "tipo": "reps",
+          "serie": 3,
+          "reps": 12,
+          "riposo": 75
+        },
+        {
+          "id": 204,
+          "nome": "Affondi camminati",
+          "tipo": "reps",
+          "serie": 3,
+          "reps": 10,
+          "riposo": 75
+        },
+        {
+          "id": 205,
+          "nome": "Polpacci in piedi",
+          "tipo": "reps",
+          "serie": 4,
+          "reps": 15,
+          "riposo": 45
+        }
+      ]
+    },
+    {
+      "id": 1003,
+      "nome": "Upper B (Intensità)",
+      "giorni": [
+        "Mercoledì"
+      ],
+      "color": 2,
+      "esercizi": [
+        {
+          "id": 301,
+          "nome": "Panca inclinata (bilanciere)",
+          "tipo": "reps",
+          "serie": 4,
+          "reps": 7,
+          "riposo": 120
+        },
+        {
+          "id": 302,
+          "nome": "Trazioni zavorrate/assistite",
+          "tipo": "reps",
+          "serie": 4,
+          "reps": 7,
+          "riposo": 120
+        },
+        {
+          "id": 303,
+          "nome": "Military press bilanciere (presa orizz.)",
+          "tipo": "reps",
+          "serie": 3,
+          "reps": 8,
+          "riposo": 90
+        },
+        {
+          "id": 304,
+          "nome": "Pulley basso",
+          "tipo": "reps",
+          "serie": 3,
+          "reps": 10,
+          "riposo": 75
+        },
+        {
+          "id": 305,
+          "nome": "Curl bilanciere",
+          "tipo": "reps",
+          "serie": 3,
+          "reps": 9,
+          "riposo": 60
+        },
+        {
+          "id": 306,
+          "nome": "French press (manubrio singolo)",
+          "tipo": "reps",
+          "serie": 3,
+          "reps": 9,
+          "riposo": 60
+        },
+        {
+          "id": 307,
+          "nome": "Addominali cavo/crunch",
+          "tipo": "reps",
+          "serie": 3,
+          "reps": 15,
+          "riposo": 45
+        }
+      ]
+    },
+    {
+      "id": 1004,
+      "nome": "Upper C (Specializzazione)",
+      "giorni": [
+        "Venerdì"
+      ],
+      "color": 3,
+      "esercizi": [
+        {
+          "id": 401,
+          "nome": "Chest press inclinata presa verticale (macchina)",
+          "tipo": "reps",
+          "serie": 4,
+          "reps": 11,
+          "riposo": 90
+        },
+        {
+          "id": 402,
+          "nome": "Alzate laterali (macchina)",
+          "tipo": "reps",
+          "serie": 3,
+          "reps": 13,
+          "riposo": 60
+        },
+        {
+          "id": 403,
+          "nome": "Pec fly / Pec deck",
+          "tipo": "reps",
+          "serie": 3,
+          "reps": 13,
+          "riposo": 60
+        },
+        {
+          "id": 404,
+          "nome": "Trazioni/lat machine presa stretta o supina",
+          "tipo": "reps",
+          "serie": 3,
+          "reps": 11,
+          "riposo": 90
+        },
+        {
+          "id": 405,
+          "nome": "Curl martello / bilanciere",
+          "tipo": "reps",
+          "serie": 3,
+          "reps": 11,
+          "riposo": 60
+        },
+        {
+          "id": 406,
+          "nome": "Dip",
+          "tipo": "reps",
+          "serie": 3,
+          "reps": 11,
+          "riposo": 60
+        },
+        {
+          "id": 407,
+          "nome": "Addominali (crunch cavo o ruota)",
+          "tipo": "reps",
+          "serie": 3,
+          "reps": 15,
+          "riposo": 45
+        }
+      ]
+    }
+  ],
+  "sessioni": [
+    {
+      "sid": 1001,
+      "data": "24 ago 2026",
+      "ts": 1787529600000,
+      "esercizi": [
+        {
+          "nome": "Chest press piana (macchina)",
+          "serie": 4,
+          "reps": 10,
+          "riposo": 90,
+          "tipo": "reps",
+          "nota": "",
+          "serie_log": [
+            {
+              "rep": 10,
+              "kg": 66
+            },
+            {
+              "rep": 9,
+              "kg": 66
+            },
+            {
+              "rep": 8,
+              "kg": 66
+            },
+            {
+              "rep": 6,
+              "kg": 66
+            }
+          ]
+        },
+        {
+          "nome": "Rematore chest-supported (macchina)",
+          "serie": 4,
+          "reps": 10,
+          "riposo": 90,
+          "tipo": "reps",
+          "nota": "70kg (parziale)",
+          "serie_log": [
+            {
+              "rep": "",
+              "kg": 70
+            },
+            {
+              "rep": "",
+              "kg": 70
+            },
+            {
+              "rep": "",
+              "kg": 70
+            },
+            {
+              "rep": "",
+              "kg": 70
+            }
+          ]
+        },
+        {
+          "nome": "Military press (macchina)",
+          "serie": 3,
+          "reps": 12,
+          "riposo": 75,
+          "tipo": "reps",
+          "nota": "",
+          "serie_log": [
+            {
+              "rep": 11,
+              "kg": 32
+            },
+            {
+              "rep": 7,
+              "kg": 32
+            },
+            {
+              "rep": 5,
+              "kg": 32
+            }
+          ]
+        },
+        {
+          "nome": "Lat machine presa larga",
+          "serie": 3,
+          "reps": 12,
+          "riposo": 75,
+          "tipo": "reps",
+          "nota": "",
+          "serie_log": [
+            {
+              "rep": 10,
+              "kg": 59
+            },
+            {
+              "rep": 9,
+              "kg": 59
+            },
+            {
+              "rep": 8,
+              "kg": 59
+            }
+          ]
+        },
+        {
+          "nome": "Curl bicipiti (concentrazione, un braccio)",
+          "serie": 3,
+          "reps": 12,
+          "riposo": 60,
+          "tipo": "reps",
+          "nota": "8+2/6+3/6+2 (reps assistite/forzate)",
+          "serie_log": [
+            {
+              "rep": 10,
+              "kg": 14
+            },
+            {
+              "rep": 9,
+              "kg": 14
+            },
+            {
+              "rep": 8,
+              "kg": 14
+            }
+          ]
+        },
+        {
+          "nome": "Push down tricipiti",
+          "serie": 3,
+          "reps": 12,
+          "riposo": 60,
+          "tipo": "reps",
+          "nota": "",
+          "serie_log": [
+            {
+              "rep": 10,
+              "kg": 41
+            },
+            {
+              "rep": 10,
+              "kg": 41
+            },
+            {
+              "rep": 9,
+              "kg": 41
+            }
+          ]
+        },
+        {
+          "nome": "Plank",
+          "serie": 3,
+          "reps": 45,
+          "riposo": 45,
+          "tipo": "tempo",
+          "nota": "",
+          "serie_log": [
+            {
+              "rep": "",
+              "kg": ""
+            },
+            {
+              "rep": "",
+              "kg": ""
+            },
+            {
+              "rep": "",
+              "kg": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sid": 1002,
+      "data": "25 ago 2026",
+      "ts": 1787616000000,
+      "esercizi": [
+        {
+          "nome": "Stacco rumeno (RDL)",
+          "serie": 4,
+          "reps": 10,
+          "riposo": 120,
+          "tipo": "reps",
+          "nota": "",
+          "serie_log": [
+            {
+              "rep": 9,
+              "kg": 53.5
+            },
+            {
+              "rep": 10,
+              "kg": 53.5
+            },
+            {
+              "rep": 10,
+              "kg": 53.5
+            },
+            {
+              "rep": 10,
+              "kg": 53.5
+            }
+          ]
+        },
+        {
+          "nome": "Leg press",
+          "serie": 3,
+          "reps": 12,
+          "riposo": 90,
+          "tipo": "reps",
+          "nota": "100→110kg",
+          "serie_log": [
+            {
+              "rep": 12,
+              "kg": 100
+            },
+            {
+              "rep": 11,
+              "kg": 110
+            },
+            {
+              "rep": 12,
+              "kg": 110
+            }
+          ]
+        },
+        {
+          "nome": "Leg curl",
+          "serie": 3,
+          "reps": 12,
+          "riposo": 75,
+          "tipo": "reps",
+          "nota": "77→84kg",
+          "serie_log": [
+            {
+              "rep": 12,
+              "kg": 77
+            },
+            {
+              "rep": 8,
+              "kg": 84
+            },
+            {
+              "rep": 10,
+              "kg": 84
+            }
+          ]
+        },
+        {
+          "nome": "Affondi camminati",
+          "serie": 3,
+          "reps": 10,
+          "riposo": 75,
+          "tipo": "reps",
+          "nota": "12kg/mano",
+          "serie_log": [
+            {
+              "rep": "",
+              "kg": 12
+            },
+            {
+              "rep": "",
+              "kg": 12
+            },
+            {
+              "rep": "",
+              "kg": 12
+            }
+          ]
+        },
+        {
+          "nome": "Polpacci in piedi",
+          "serie": 4,
+          "reps": 15,
+          "riposo": 45,
+          "tipo": "reps",
+          "nota": "",
+          "serie_log": [
+            {
+              "rep": "",
+              "kg": 30.4
+            },
+            {
+              "rep": "",
+              "kg": 30.4
+            },
+            {
+              "rep": "",
+              "kg": 30.4
+            },
+            {
+              "rep": "",
+              "kg": 30.4
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sid": 1003,
+      "data": "26 ago 2026",
+      "ts": 1787702400000,
+      "esercizi": [
+        {
+          "nome": "Panca inclinata (bilanciere)",
+          "serie": 4,
+          "reps": 7,
+          "riposo": 120,
+          "tipo": "reps",
+          "nota": "ricalibrato: 40→60→50→50kg",
+          "serie_log": [
+            {
+              "rep": 11,
+              "kg": 40
+            },
+            {
+              "rep": 5,
+              "kg": 60
+            },
+            {
+              "rep": 6,
+              "kg": 50
+            },
+            {
+              "rep": 7,
+              "kg": 50
+            }
+          ]
+        },
+        {
+          "nome": "Trazioni zavorrate/assistite",
+          "serie": 4,
+          "reps": 7,
+          "riposo": 120,
+          "tipo": "reps",
+          "nota": "14→9kg",
+          "serie_log": [
+            {
+              "rep": 8,
+              "kg": 14
+            },
+            {
+              "rep": 8,
+              "kg": 9
+            },
+            {
+              "rep": 5,
+              "kg": 9
+            },
+            {
+              "rep": 6,
+              "kg": 9
+            }
+          ]
+        },
+        {
+          "nome": "Military press bilanciere (presa orizz.)",
+          "serie": 3,
+          "reps": 8,
+          "riposo": 90,
+          "tipo": "reps",
+          "nota": "30→50kg",
+          "serie_log": [
+            {
+              "rep": 10,
+              "kg": 30
+            },
+            {
+              "rep": 8,
+              "kg": 50
+            },
+            {
+              "rep": 6,
+              "kg": 50
+            }
+          ]
+        },
+        {
+          "nome": "Pulley basso",
+          "serie": 3,
+          "reps": 10,
+          "riposo": 75,
+          "tipo": "reps",
+          "nota": "39→45kg",
+          "serie_log": [
+            {
+              "rep": 10,
+              "kg": 39
+            },
+            {
+              "rep": 10,
+              "kg": 45
+            },
+            {
+              "rep": 9,
+              "kg": 45
+            }
+          ]
+        },
+        {
+          "nome": "Curl bilanciere",
+          "serie": 3,
+          "reps": 9,
+          "riposo": 60,
+          "tipo": "reps",
+          "nota": "10+10→15+10kg",
+          "serie_log": [
+            {
+              "rep": 12,
+              "kg": 20
+            },
+            {
+              "rep": 8,
+              "kg": 25
+            },
+            {
+              "rep": "",
+              "kg": ""
+            }
+          ]
+        },
+        {
+          "nome": "French press (manubrio singolo)",
+          "serie": 3,
+          "reps": 9,
+          "riposo": 60,
+          "tipo": "reps",
+          "nota": "",
+          "serie_log": [
+            {
+              "rep": 10,
+              "kg": 24
+            },
+            {
+              "rep": 10,
+              "kg": 26
+            },
+            {
+              "rep": 9,
+              "kg": 26
+            }
+          ]
+        },
+        {
+          "nome": "Addominali cavo/crunch",
+          "serie": 3,
+          "reps": 15,
+          "riposo": 45,
+          "tipo": "reps",
+          "nota": "41→59kg",
+          "serie_log": [
+            {
+              "rep": 15,
+              "kg": 41
+            },
+            {
+              "rep": 15,
+              "kg": 59
+            },
+            {
+              "rep": 15,
+              "kg": 59
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sid": 1004,
+      "data": "28 ago 2026",
+      "ts": 1787875200000,
+      "esercizi": [
+        {
+          "nome": "Chest press inclinata presa verticale (macchina)",
+          "serie": 4,
+          "reps": 11,
+          "riposo": 90,
+          "tipo": "reps",
+          "nota": "",
+          "serie_log": [
+            {
+              "rep": 12,
+              "kg": 40
+            },
+            {
+              "rep": 10,
+              "kg": 40
+            },
+            {
+              "rep": 8,
+              "kg": 40
+            },
+            {
+              "rep": 7,
+              "kg": 40
+            }
+          ]
+        },
+        {
+          "nome": "Alzate laterali (macchina)",
+          "serie": 3,
+          "reps": 13,
+          "riposo": 60,
+          "tipo": "reps",
+          "nota": "0→5→7.5kg (progressione carico)",
+          "serie_log": [
+            {
+              "rep": 15,
+              "kg": 0
+            },
+            {
+              "rep": 14,
+              "kg": 5
+            },
+            {
+              "rep": 14,
+              "kg": 7.5
+            }
+          ]
+        },
+        {
+          "nome": "Pec fly / Pec deck",
+          "serie": 3,
+          "reps": 13,
+          "riposo": 60,
+          "tipo": "reps",
+          "nota": "73→93kg 12/12/8+6forz+3neg",
+          "serie_log": [
+            {
+              "rep": 12,
+              "kg": 73
+            },
+            {
+              "rep": 12,
+              "kg": 93
+            },
+            {
+              "rep": 8,
+              "kg": 93
+            }
+          ]
+        },
+        {
+          "nome": "Trazioni/lat machine presa stretta o supina",
+          "serie": 3,
+          "reps": 11,
+          "riposo": 90,
+          "tipo": "reps",
+          "nota": "",
+          "serie_log": [
+            {
+              "rep": 12,
+              "kg": 59
+            },
+            {
+              "rep": 12,
+              "kg": 59
+            },
+            {
+              "rep": 12,
+              "kg": 59
+            }
+          ]
+        },
+        {
+          "nome": "Curl martello / bilanciere",
+          "serie": 3,
+          "reps": 11,
+          "riposo": 60,
+          "tipo": "reps",
+          "nota": "7+3/6+4 (assistito)",
+          "serie_log": [
+            {
+              "rep": 7,
+              "kg": 14
+            },
+            {
+              "rep": 6,
+              "kg": 14
+            },
+            {
+              "rep": "",
+              "kg": ""
+            }
+          ]
+        },
+        {
+          "nome": "Dip",
+          "serie": 3,
+          "reps": 11,
+          "riposo": 60,
+          "tipo": "reps",
+          "nota": "",
+          "serie_log": [
+            {
+              "rep": 12,
+              "kg": 14
+            },
+            {
+              "rep": 11,
+              "kg": 14
+            },
+            {
+              "rep": 8,
+              "kg": 14
+            }
+          ]
+        },
+        {
+          "nome": "Addominali (crunch cavo o ruota)",
+          "serie": 3,
+          "reps": 15,
+          "riposo": 45,
+          "tipo": "reps",
+          "nota": "59→64kg",
+          "serie_log": [
+            {
+              "rep": 15,
+              "kg": 59
+            },
+            {
+              "rep": 15,
+              "kg": 64
+            },
+            {
+              "rep": 14,
+              "kg": 64
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sid": 1004,
+      "data": "31 ago 2026",
+      "ts": 1788134400001,
+      "esercizi": [
+        {
+          "nome": "Chest press inclinata presa verticale (macchina)",
+          "serie": 4,
+          "reps": 11,
+          "riposo": 90,
+          "tipo": "reps",
+          "nota": "",
+          "serie_log": [
+            {
+              "rep": 12,
+              "kg": 40
+            },
+            {
+              "rep": 10,
+              "kg": 40
+            },
+            {
+              "rep": 8,
+              "kg": 40
+            },
+            {
+              "rep": 7,
+              "kg": 40
+            }
+          ]
+        },
+        {
+          "nome": "Alzate laterali (macchina)",
+          "serie": 3,
+          "reps": 13,
+          "riposo": 60,
+          "tipo": "reps",
+          "nota": "non registrato",
+          "serie_log": [
+            {
+              "rep": "",
+              "kg": ""
+            },
+            {
+              "rep": "",
+              "kg": ""
+            },
+            {
+              "rep": "",
+              "kg": ""
+            }
+          ]
+        },
+        {
+          "nome": "Pec fly / Pec deck",
+          "serie": 3,
+          "reps": 13,
+          "riposo": 60,
+          "tipo": "reps",
+          "nota": "forse meglio 86kg",
+          "serie_log": [
+            {
+              "rep": 10,
+              "kg": 93
+            },
+            {
+              "rep": 9,
+              "kg": 93
+            },
+            {
+              "rep": 7,
+              "kg": 93
+            }
+          ]
+        },
+        {
+          "nome": "Trazioni/lat machine presa stretta o supina",
+          "serie": 3,
+          "reps": 11,
+          "riposo": 90,
+          "tipo": "reps",
+          "nota": "59→66kg",
+          "serie_log": [
+            {
+              "rep": 12,
+              "kg": 59
+            },
+            {
+              "rep": 10,
+              "kg": 66
+            },
+            {
+              "rep": 10,
+              "kg": 66
+            }
+          ]
+        },
+        {
+          "nome": "Curl martello / bilanciere",
+          "serie": 3,
+          "reps": 11,
+          "riposo": 60,
+          "tipo": "reps",
+          "nota": "",
+          "serie_log": [
+            {
+              "rep": 12,
+              "kg": 14
+            },
+            {
+              "rep": "",
+              "kg": ""
+            },
+            {
+              "rep": "",
+              "kg": ""
+            }
+          ]
+        },
+        {
+          "nome": "Dip",
+          "serie": 3,
+          "reps": 11,
+          "riposo": 60,
+          "tipo": "reps",
+          "nota": "",
+          "serie_log": [
+            {
+              "rep": 12,
+              "kg": 14
+            },
+            {
+              "rep": 11,
+              "kg": 14
+            },
+            {
+              "rep": "",
+              "kg": ""
+            }
+          ]
+        },
+        {
+          "nome": "Addominali (crunch cavo o ruota)",
+          "serie": 3,
+          "reps": 15,
+          "riposo": 45,
+          "tipo": "reps",
+          "nota": "",
+          "serie_log": [
+            {
+              "rep": 15,
+              "kg": 64
+            },
+            {
+              "rep": 15,
+              "kg": 64
+            },
+            {
+              "rep": 15,
+              "kg": 64
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sid": 1001,
+      "data": "31 ago 2026",
+      "ts": 1788134400000,
+      "esercizi": [
+        {
+          "nome": "Chest press piana (macchina)",
+          "serie": 4,
+          "reps": 10,
+          "riposo": 90,
+          "tipo": "reps",
+          "nota": "",
+          "serie_log": [
+            {
+              "rep": 10,
+              "kg": 66
+            },
+            {
+              "rep": 8,
+              "kg": 66
+            },
+            {
+              "rep": 8,
+              "kg": 66
+            },
+            {
+              "rep": "",
+              "kg": ""
+            }
+          ]
+        },
+        {
+          "nome": "Rematore chest-supported (macchina)",
+          "serie": 4,
+          "reps": 10,
+          "riposo": 90,
+          "tipo": "reps",
+          "nota": "",
+          "serie_log": [
+            {
+              "rep": 10,
+              "kg": 70
+            },
+            {
+              "rep": 9,
+              "kg": 70
+            },
+            {
+              "rep": 8,
+              "kg": 70
+            },
+            {
+              "rep": 8,
+              "kg": 70
+            }
+          ]
+        },
+        {
+          "nome": "Military press (macchina)",
+          "serie": 3,
+          "reps": 12,
+          "riposo": 75,
+          "tipo": "reps",
+          "nota": "sessione a 4 serie invece di 3",
+          "serie_log": [
+            {
+              "rep": 10,
+              "kg": 33.1
+            },
+            {
+              "rep": 8,
+              "kg": 33.1
+            },
+            {
+              "rep": 7,
+              "kg": 33.1
+            },
+            {
+              "rep": 6,
+              "kg": 33.1
+            }
+          ]
+        },
+        {
+          "nome": "Lat machine presa larga",
+          "serie": 3,
+          "reps": 12,
+          "riposo": 75,
+          "tipo": "reps",
+          "nota": "52→54.3kg",
+          "serie_log": [
+            {
+              "rep": 12,
+              "kg": 52
+            },
+            {
+              "rep": 12,
+              "kg": 52
+            },
+            {
+              "rep": 10,
+              "kg": 54.3
+            }
+          ]
+        },
+        {
+          "nome": "Curl bicipiti (concentrazione, un braccio)",
+          "serie": 3,
+          "reps": 12,
+          "riposo": 60,
+          "tipo": "reps",
+          "nota": "",
+          "serie_log": [
+            {
+              "rep": 10,
+              "kg": 14
+            },
+            {
+              "rep": "",
+              "kg": ""
+            },
+            {
+              "rep": "",
+              "kg": ""
+            }
+          ]
+        },
+        {
+          "nome": "Push down tricipiti",
+          "serie": 3,
+          "reps": 12,
+          "riposo": 60,
+          "tipo": "reps",
+          "nota": "",
+          "serie_log": [
+            {
+              "rep": 10,
+              "kg": 43.3
+            },
+            {
+              "rep": "",
+              "kg": ""
+            },
+            {
+              "rep": "",
+              "kg": ""
+            }
+          ]
+        },
+        {
+          "nome": "Plank",
+          "serie": 3,
+          "reps": 45,
+          "riposo": 45,
+          "tipo": "tempo",
+          "nota": "",
+          "serie_log": [
+            {
+              "rep": "",
+              "kg": ""
+            },
+            {
+              "rep": "",
+              "kg": ""
+            },
+            {
+              "rep": "",
+              "kg": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sid": 1002,
+      "data": "1 set 2026",
+      "ts": 1788220800000,
+      "esercizi": [
+        {
+          "nome": "Stacco rumeno (RDL)",
+          "serie": 4,
+          "reps": 10,
+          "riposo": 120,
+          "tipo": "reps",
+          "nota": "60kg 10/10/10, 70kg 8 (parziale)",
+          "serie_log": [
+            {
+              "rep": 10,
+              "kg": 60
+            },
+            {
+              "rep": 10,
+              "kg": 60
+            },
+            {
+              "rep": 10,
+              "kg": 60
+            },
+            {
+              "rep": 8,
+              "kg": 70
+            }
+          ]
+        },
+        {
+          "nome": "Leg press",
+          "serie": 3,
+          "reps": 12,
+          "riposo": 90,
+          "tipo": "reps",
+          "nota": "nuovo top",
+          "serie_log": [
+            {
+              "rep": 12,
+              "kg": 120
+            },
+            {
+              "rep": 12,
+              "kg": 120
+            },
+            {
+              "rep": "",
+              "kg": 120
+            }
+          ]
+        },
+        {
+          "nome": "Leg curl",
+          "serie": 3,
+          "reps": 12,
+          "riposo": 75,
+          "tipo": "reps",
+          "nota": "77→84kg",
+          "serie_log": [
+            {
+              "rep": 12,
+              "kg": 77
+            },
+            {
+              "rep": 12,
+              "kg": 84
+            },
+            {
+              "rep": "",
+              "kg": ""
+            }
+          ]
+        },
+        {
+          "nome": "Affondi camminati",
+          "serie": 3,
+          "reps": 10,
+          "riposo": 75,
+          "tipo": "reps",
+          "nota": "12kg/mano",
+          "serie_log": [
+            {
+              "rep": "",
+              "kg": 12
+            },
+            {
+              "rep": "",
+              "kg": 12
+            },
+            {
+              "rep": "",
+              "kg": 12
+            }
+          ]
+        },
+        {
+          "nome": "Polpacci in piedi",
+          "serie": 4,
+          "reps": 15,
+          "riposo": 45,
+          "tipo": "reps",
+          "nota": "",
+          "serie_log": [
+            {
+              "rep": "",
+              "kg": 30.4
+            },
+            {
+              "rep": "",
+              "kg": 30.4
+            },
+            {
+              "rep": "",
+              "kg": 30.4
+            },
+            {
+              "rep": "",
+              "kg": 30.4
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sid": 1003,
+      "data": "3 set 2026",
+      "ts": 1788393600000,
+      "esercizi": [
+        {
+          "nome": "Panca inclinata (bilanciere)",
+          "serie": 4,
+          "reps": 7,
+          "riposo": 120,
+          "tipo": "reps",
+          "nota": "50kg 9/8/9→55kg 6",
+          "serie_log": [
+            {
+              "rep": 9,
+              "kg": 50
+            },
+            {
+              "rep": 8,
+              "kg": 50
+            },
+            {
+              "rep": 9,
+              "kg": 50
+            },
+            {
+              "rep": 6,
+              "kg": 55
+            }
+          ]
+        },
+        {
+          "nome": "Trazioni zavorrate/assistite",
+          "serie": 4,
+          "reps": 7,
+          "riposo": 120,
+          "tipo": "reps",
+          "nota": "",
+          "serie_log": [
+            {
+              "rep": 10,
+              "kg": 9
+            },
+            {
+              "rep": 8,
+              "kg": 9
+            },
+            {
+              "rep": 8,
+              "kg": 9
+            },
+            {
+              "rep": 7,
+              "kg": 9
+            }
+          ]
+        },
+        {
+          "nome": "Military press bilanciere (presa orizz.)",
+          "serie": 3,
+          "reps": 8,
+          "riposo": 90,
+          "tipo": "reps",
+          "nota": "50→55kg",
+          "serie_log": [
+            {
+              "rep": 8,
+              "kg": 50
+            },
+            {
+              "rep": 7,
+              "kg": 55
+            },
+            {
+              "rep": "",
+              "kg": ""
+            }
+          ]
+        },
+        {
+          "nome": "Pulley basso",
+          "serie": 3,
+          "reps": 10,
+          "riposo": 75,
+          "tipo": "reps",
+          "nota": "45→52kg",
+          "serie_log": [
+            {
+              "rep": 11,
+              "kg": 45
+            },
+            {
+              "rep": 10,
+              "kg": 52
+            },
+            {
+              "rep": "",
+              "kg": ""
+            }
+          ]
+        },
+        {
+          "nome": "Curl bilanciere",
+          "serie": 3,
+          "reps": 9,
+          "riposo": 60,
+          "tipo": "reps",
+          "nota": "",
+          "serie_log": [
+            {
+              "rep": 8,
+              "kg": 29.7
+            },
+            {
+              "rep": 6,
+              "kg": 29.7
+            },
+            {
+              "rep": 6,
+              "kg": 29.7
+            }
+          ]
+        },
+        {
+          "nome": "French press (manubrio singolo)",
+          "serie": 3,
+          "reps": 9,
+          "riposo": 60,
+          "tipo": "reps",
+          "nota": "",
+          "serie_log": [
+            {
+              "rep": 10,
+              "kg": 26
+            },
+            {
+              "rep": "",
+              "kg": ""
+            },
+            {
+              "rep": "",
+              "kg": ""
+            }
+          ]
+        },
+        {
+          "nome": "Addominali cavo/crunch",
+          "serie": 3,
+          "reps": 15,
+          "riposo": 45,
+          "tipo": "reps",
+          "nota": "59→64kg",
+          "serie_log": [
+            {
+              "rep": 15,
+              "kg": 59
+            },
+            {
+              "rep": 15,
+              "kg": 64
+            },
+            {
+              "rep": 15,
+              "kg": 64
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sid": 1001,
+      "data": "8 set 2026",
+      "ts": 1788825600000,
+      "esercizi": [
+        {
+          "nome": "Chest press piana (macchina)",
+          "serie": 4,
+          "reps": 10,
+          "riposo": 90,
+          "tipo": "reps",
+          "nota": "",
+          "serie_log": [
+            {
+              "rep": 10,
+              "kg": 66
+            },
+            {
+              "rep": 10,
+              "kg": 66
+            },
+            {
+              "rep": 9,
+              "kg": 66
+            },
+            {
+              "rep": 7,
+              "kg": 66
+            }
+          ]
+        },
+        {
+          "nome": "Rematore chest-supported (macchina)",
+          "serie": 4,
+          "reps": 10,
+          "riposo": 90,
+          "tipo": "reps",
+          "nota": "nuovo top: 70→80kg",
+          "serie_log": [
+            {
+              "rep": 10,
+              "kg": 70
+            },
+            {
+              "rep": 10,
+              "kg": 70
+            },
+            {
+              "rep": 9,
+              "kg": 80
+            },
+            {
+              "rep": 8,
+              "kg": 80
+            }
+          ]
+        },
+        {
+          "nome": "Military press (macchina)",
+          "serie": 3,
+          "reps": 12,
+          "riposo": 75,
+          "tipo": "reps",
+          "nota": "ceduto",
+          "serie_log": [
+            {
+              "rep": 10,
+              "kg": 33.1
+            },
+            {
+              "rep": 9,
+              "kg": 33.1
+            },
+            {
+              "rep": 6,
+              "kg": 33.1
+            }
+          ]
+        },
+        {
+          "nome": "Lat machine presa larga",
+          "serie": 3,
+          "reps": 12,
+          "riposo": 75,
+          "tipo": "reps",
+          "nota": "52→54.3kg",
+          "serie_log": [
+            {
+              "rep": 12,
+              "kg": 52
+            },
+            {
+              "rep": 12,
+              "kg": 54.3
+            },
+            {
+              "rep": 11,
+              "kg": 54.3
+            }
+          ]
+        },
+        {
+          "nome": "Curl bicipiti (concentrazione, un braccio)",
+          "serie": 3,
+          "reps": 12,
+          "riposo": 60,
+          "tipo": "reps",
+          "nota": "",
+          "serie_log": [
+            {
+              "rep": 10,
+              "kg": 14
+            },
+            {
+              "rep": 9,
+              "kg": 14
+            },
+            {
+              "rep": 9,
+              "kg": 14
+            }
+          ]
+        },
+        {
+          "nome": "Push down tricipiti",
+          "serie": 3,
+          "reps": 12,
+          "riposo": 60,
+          "tipo": "reps",
+          "nota": "",
+          "serie_log": [
+            {
+              "rep": 12,
+              "kg": 43.3
+            },
+            {
+              "rep": 11,
+              "kg": 43.3
+            },
+            {
+              "rep": 9,
+              "kg": 43.3
+            }
+          ]
+        },
+        {
+          "nome": "Plank",
+          "serie": 3,
+          "reps": 45,
+          "riposo": 45,
+          "tipo": "tempo",
+          "nota": "",
+          "serie_log": [
+            {
+              "rep": "",
+              "kg": ""
+            },
+            {
+              "rep": "",
+              "kg": ""
+            },
+            {
+              "rep": "",
+              "kg": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sid": 1002,
+      "data": "9 set 2026",
+      "ts": 1788912000000,
+      "esercizi": [
+        {
+          "nome": "Stacco rumeno (RDL)",
+          "serie": 4,
+          "reps": 10,
+          "riposo": 120,
+          "tipo": "reps",
+          "nota": "nuovo top: 60→70kg",
+          "serie_log": [
+            {
+              "rep": 10,
+              "kg": 60
+            },
+            {
+              "rep": 10,
+              "kg": 60
+            },
+            {
+              "rep": 10,
+              "kg": 60
+            },
+            {
+              "rep": 8,
+              "kg": 70
+            }
+          ]
+        },
+        {
+          "nome": "Leg press",
+          "serie": 3,
+          "reps": 12,
+          "riposo": 90,
+          "tipo": "reps",
+          "nota": "tutte piene",
+          "serie_log": [
+            {
+              "rep": 12,
+              "kg": 120
+            },
+            {
+              "rep": 12,
+              "kg": 120
+            },
+            {
+              "rep": 12,
+              "kg": 120
+            }
+          ]
+        },
+        {
+          "nome": "Leg curl",
+          "serie": 3,
+          "reps": 12,
+          "riposo": 75,
+          "tipo": "reps",
+          "nota": "77→84kg",
+          "serie_log": [
+            {
+              "rep": 12,
+              "kg": 77
+            },
+            {
+              "rep": 11,
+              "kg": 84
+            },
+            {
+              "rep": 10,
+              "kg": 84
+            }
+          ]
+        },
+        {
+          "nome": "Affondi camminati",
+          "serie": 3,
+          "reps": 10,
+          "riposo": 75,
+          "tipo": "reps",
+          "nota": "14kg/mano",
+          "serie_log": [
+            {
+              "rep": 20,
+              "kg": 14
+            },
+            {
+              "rep": 20,
+              "kg": 14
+            },
+            {
+              "rep": 20,
+              "kg": 14
+            }
+          ]
+        },
+        {
+          "nome": "Polpacci in piedi",
+          "serie": 4,
+          "reps": 15,
+          "riposo": 45,
+          "tipo": "reps",
+          "nota": "carico extra 30.4+10kg",
+          "serie_log": [
+            {
+              "rep": 15,
+              "kg": 40.4
+            },
+            {
+              "rep": 15,
+              "kg": 40.4
+            },
+            {
+              "rep": 15,
+              "kg": 40.4
+            },
+            {
+              "rep": 15,
+              "kg": 40.4
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sid": 1003,
+      "data": "10 set 2026",
+      "ts": 1788998400000,
+      "esercizi": [
+        {
+          "nome": "Panca inclinata (bilanciere)",
+          "serie": 4,
+          "reps": 7,
+          "riposo": 120,
+          "tipo": "reps",
+          "nota": "ceduto: 50→55kg",
+          "serie_log": [
+            {
+              "rep": 8,
+              "kg": 50
+            },
+            {
+              "rep": 8,
+              "kg": 55
+            },
+            {
+              "rep": 8,
+              "kg": 55
+            },
+            {
+              "rep": 5,
+              "kg": 55
+            }
+          ]
+        },
+        {
+          "nome": "Trazioni zavorrate/assistite",
+          "serie": 4,
+          "reps": 7,
+          "riposo": 120,
+          "tipo": "reps",
+          "nota": "9→4.5kg",
+          "serie_log": [
+            {
+              "rep": 10,
+              "kg": 9
+            },
+            {
+              "rep": 7,
+              "kg": 4.5
+            },
+            {
+              "rep": 7,
+              "kg": 4.5
+            },
+            {
+              "rep": 6,
+              "kg": 4.5
+            }
+          ]
+        },
+        {
+          "nome": "Military press bilanciere (presa orizz.)",
+          "serie": 3,
+          "reps": 8,
+          "riposo": 90,
+          "tipo": "reps",
+          "nota": "ceduto",
+          "serie_log": [
+            {
+              "rep": 8,
+              "kg": 55
+            },
+            {
+              "rep": 8,
+              "kg": 55
+            },
+            {
+              "rep": 5,
+              "kg": 55
+            }
+          ]
+        },
+        {
+          "nome": "Pulley basso",
+          "serie": 3,
+          "reps": 10,
+          "riposo": 75,
+          "tipo": "reps",
+          "nota": "",
+          "serie_log": [
+            {
+              "rep": 10,
+              "kg": 52
+            },
+            {
+              "rep": 10,
+              "kg": 52
+            },
+            {
+              "rep": "",
+              "kg": ""
+            }
+          ]
+        },
+        {
+          "nome": "Curl bilanciere",
+          "serie": 3,
+          "reps": 9,
+          "riposo": 60,
+          "tipo": "reps",
+          "nota": "",
+          "serie_log": [
+            {
+              "rep": 10,
+              "kg": 29.7
+            },
+            {
+              "rep": 7,
+              "kg": 29.7
+            },
+            {
+              "rep": 7,
+              "kg": 29.7
+            }
+          ]
+        },
+        {
+          "nome": "French press (manubrio singolo)",
+          "serie": 3,
+          "reps": 9,
+          "riposo": 60,
+          "tipo": "reps",
+          "nota": "nuovo top: 26→28kg",
+          "serie_log": [
+            {
+              "rep": 10,
+              "kg": 26
+            },
+            {
+              "rep": 10,
+              "kg": 28
+            },
+            {
+              "rep": 9,
+              "kg": 28
+            }
+          ]
+        },
+        {
+          "nome": "Addominali cavo/crunch",
+          "serie": 3,
+          "reps": 15,
+          "riposo": 45,
+          "tipo": "reps",
+          "nota": "nuovo top: 64→68kg",
+          "serie_log": [
+            {
+              "rep": 15,
+              "kg": 64
+            },
+            {
+              "rep": 15,
+              "kg": 64
+            },
+            {
+              "rep": 13,
+              "kg": 68
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sid": 1004,
+      "data": "12 set 2026",
+      "ts": 1789171200000,
+      "esercizi": [
+        {
+          "nome": "Chest press inclinata presa verticale (macchina)",
+          "serie": 4,
+          "reps": 11,
+          "riposo": 90,
+          "tipo": "reps",
+          "nota": "nuovo top: 40→45kg",
+          "serie_log": [
+            {
+              "rep": 12,
+              "kg": 40
+            },
+            {
+              "rep": 12,
+              "kg": 45
+            },
+            {
+              "rep": 12,
+              "kg": 45
+            },
+            {
+              "rep": 10,
+              "kg": 45
+            }
+          ]
+        },
+        {
+          "nome": "Alzate laterali (macchina)",
+          "serie": 3,
+          "reps": 13,
+          "riposo": 60,
+          "tipo": "reps",
+          "nota": "10→12.5kg",
+          "serie_log": [
+            {
+              "rep": 15,
+              "kg": 10
+            },
+            {
+              "rep": 15,
+              "kg": 10
+            },
+            {
+              "rep": 11,
+              "kg": 12.5
+            }
+          ]
+        },
+        {
+          "nome": "Pec fly / Pec deck",
+          "serie": 3,
+          "reps": 13,
+          "riposo": 60,
+          "tipo": "reps",
+          "nota": "sceso da 93 a 86kg per ROM",
+          "serie_log": [
+            {
+              "rep": 12,
+              "kg": 86
+            },
+            {
+              "rep": 11,
+              "kg": 86
+            },
+            {
+              "rep": 10,
+              "kg": 86
+            }
+          ]
+        },
+        {
+          "nome": "Trazioni/lat machine presa stretta o supina",
+          "serie": 3,
+          "reps": 11,
+          "riposo": 90,
+          "tipo": "reps",
+          "nota": "",
+          "serie_log": [
+            {
+              "rep": 12,
+              "kg": 66
+            },
+            {
+              "rep": 12,
+              "kg": 66
+            },
+            {
+              "rep": 9,
+              "kg": 66
+            }
+          ]
+        },
+        {
+          "nome": "Curl martello / bilanciere",
+          "serie": 3,
+          "reps": 11,
+          "riposo": 60,
+          "tipo": "reps",
+          "nota": "assistenza controllata",
+          "serie_log": [
+            {
+              "rep": 10,
+              "kg": 12
+            },
+            {
+              "rep": 10,
+              "kg": 12
+            },
+            {
+              "rep": 9,
+              "kg": 12
+            }
+          ]
+        },
+        {
+          "nome": "Dip",
+          "serie": 3,
+          "reps": 11,
+          "riposo": 60,
+          "tipo": "reps",
+          "nota": "9→4.5kg",
+          "serie_log": [
+            {
+              "rep": 12,
+              "kg": 9
+            },
+            {
+              "rep": 12,
+              "kg": 9
+            },
+            {
+              "rep": 9,
+              "kg": 4.5
+            }
+          ]
+        },
+        {
+          "nome": "Addominali (crunch cavo o ruota)",
+          "serie": 3,
+          "reps": 15,
+          "riposo": 45,
+          "tipo": "reps",
+          "nota": "64→68kg",
+          "serie_log": [
+            {
+              "rep": 15,
+              "kg": 64
+            },
+            {
+              "rep": 13,
+              "kg": 68
+            },
+            {
+              "rep": 13,
+              "kg": 68
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sid": 1001,
+      "data": "14 set 2026",
+      "ts": 1789344000000,
+      "esercizi": [
+        {
+          "nome": "Chest press piana (macchina)",
+          "serie": 4,
+          "reps": 10,
+          "riposo": 90,
+          "tipo": "reps",
+          "nota": "",
+          "serie_log": [
+            {
+              "rep": 10,
+              "kg": 66
+            },
+            {
+              "rep": 10,
+              "kg": 66
+            },
+            {
+              "rep": 10,
+              "kg": 66
+            },
+            {
+              "rep": 8,
+              "kg": 66
+            }
+          ]
+        },
+        {
+          "nome": "Rematore chest-supported (macchina)",
+          "serie": 4,
+          "reps": 10,
+          "riposo": 90,
+          "tipo": "reps",
+          "nota": "",
+          "serie_log": [
+            {
+              "rep": 10,
+              "kg": 70
+            },
+            {
+              "rep": 10,
+              "kg": 80
+            },
+            {
+              "rep": 10,
+              "kg": 80
+            },
+            {
+              "rep": 10,
+              "kg": 90
+            }
+          ]
+        },
+        {
+          "nome": "Military press (macchina)",
+          "serie": 3,
+          "reps": 12,
+          "riposo": 75,
+          "tipo": "reps",
+          "nota": "",
+          "serie_log": [
+            {
+              "rep": 10,
+              "kg": 33.1
+            },
+            {
+              "rep": 10,
+              "kg": 33.1
+            },
+            {
+              "rep": 6,
+              "kg": 34.2
+            }
+          ]
+        },
+        {
+          "nome": "Lat machine presa larga",
+          "serie": 3,
+          "reps": 12,
+          "riposo": 75,
+          "tipo": "reps",
+          "nota": "",
+          "serie_log": [
+            {
+              "rep": 12,
+              "kg": 54.3
+            },
+            {
+              "rep": 12,
+              "kg": 56.6
+            },
+            {
+              "rep": 12,
+              "kg": 59
+            }
+          ]
+        },
+        {
+          "nome": "Curl bicipiti (concentrazione, un braccio)",
+          "serie": 3,
+          "reps": 12,
+          "riposo": 60,
+          "tipo": "reps",
+          "nota": "ultime 2 e la terza serie assistite",
+          "serie_log": [
+            {
+              "rep": 10,
+              "kg": 14
+            },
+            {
+              "rep": 10,
+              "kg": 14
+            },
+            {
+              "rep": 9,
+              "kg": 14
+            }
+          ]
+        },
+        {
+          "nome": "Push down tricipiti",
+          "serie": 3,
+          "reps": 12,
+          "riposo": 60,
+          "tipo": "reps",
+          "nota": "",
+          "serie_log": [
+            {
+              "rep": 12,
+              "kg": 43.3
+            },
+            {
+              "rep": 10,
+              "kg": 43.3
+            },
+            {
+              "rep": 10,
+              "kg": 43.3
+            }
+          ]
+        },
+        {
+          "nome": "Plank",
+          "serie": 3,
+          "reps": 45,
+          "riposo": 45,
+          "tipo": "tempo",
+          "nota": "fatto",
+          "serie_log": [
+            {
+              "rep": "",
+              "kg": ""
+            },
+            {
+              "rep": "",
+              "kg": ""
+            },
+            {
+              "rep": "",
+              "kg": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sid": 1003,
+      "data": "16 set 2026",
+      "ts": 1789541824038,
+      "esercizi": [
+        {
+          "nome": "Panca inclinata (bilanciere)",
+          "serie": 4,
+          "reps": 7,
+          "riposo": 120,
+          "tipo": "reps",
+          "serie_log": [
+            {
+              "rep": "8",
+              "kg": "50"
+            },
+            {
+              "rep": "8",
+              "kg": "55"
+            },
+            {
+              "rep": "8",
+              "kg": "55"
+            },
+            {
+              "rep": "7",
+              "kg": "55"
+            }
+          ],
+          "nota": "Ceduto ultima "
+        },
+        {
+          "nome": "Trazioni zavorrate/assistite",
+          "serie": 4,
+          "reps": 7,
+          "riposo": 120,
+          "tipo": "reps",
+          "serie_log": [
+            {
+              "rep": "8",
+              "kg": "4.5"
+            },
+            {
+              "rep": "8",
+              "kg": "4.5"
+            },
+            {
+              "rep": "8",
+              "kg": "4.5"
+            },
+            {
+              "rep": "7",
+              "kg": "4.5"
+            }
+          ],
+          "nota": ""
+        },
+        {
+          "nome": "Military press bilanciere (presa orizz.)",
+          "serie": 3,
+          "reps": 8,
+          "riposo": 90,
+          "tipo": "reps",
+          "serie_log": [
+            {
+              "rep": "8",
+              "kg": "55"
+            },
+            {
+              "rep": "8",
+              "kg": "55"
+            },
+            {
+              "rep": "6",
+              "kg": "55"
+            }
+          ],
+          "nota": "Ceduto ultima "
+        },
+        {
+          "nome": "Pulley basso",
+          "serie": 3,
+          "reps": 10,
+          "riposo": 75,
+          "tipo": "reps",
+          "serie_log": [
+            {
+              "rep": "10",
+              "kg": "52"
+            },
+            {
+              "rep": "10",
+              "kg": "52"
+            },
+            {
+              "rep": "",
+              "kg": ""
+            }
+          ],
+          "nota": "Rimanere per migliorare Rom"
+        },
+        {
+          "nome": "Curl bilanciere",
+          "serie": 3,
+          "reps": 9,
+          "riposo": 60,
+          "tipo": "reps",
+          "serie_log": [
+            {
+              "rep": "10",
+              "kg": "29.7"
+            },
+            {
+              "rep": "8",
+              "kg": "29.7"
+            },
+            {
+              "rep": "7",
+              "kg": "29.7"
+            }
+          ],
+          "nota": ""
+        },
+        {
+          "nome": "French press (manubrio singolo)",
+          "serie": 3,
+          "reps": 9,
+          "riposo": 60,
+          "tipo": "reps",
+          "serie_log": [
+            {
+              "rep": "10",
+              "kg": "28"
+            },
+            {
+              "rep": "10",
+              "kg": "28"
+            },
+            {
+              "rep": "10",
+              "kg": "28"
+            }
+          ],
+          "nota": ""
+        },
+        {
+          "nome": "Addominali cavo/crunch",
+          "serie": 3,
+          "reps": 15,
+          "riposo": 45,
+          "tipo": "reps",
+          "serie_log": [
+            {
+              "rep": "15",
+              "kg": "64"
+            },
+            {
+              "rep": "15",
+              "kg": "68"
+            },
+            {
+              "rep": "15",
+              "kg": "68"
+            }
+          ],
+          "nota": ""
+        }
+      ]
+    },
+    {
+      "sid": 1002,
+      "data": "17 set 2026",
+      "ts": 1789655244112,
+      "esercizi": [
+        {
+          "nome": "Stacco rumeno (RDL)",
+          "serie": 4,
+          "reps": 10,
+          "riposo": 120,
+          "tipo": "reps",
+          "serie_log": [
+            {
+              "rep": "10",
+              "kg": "60"
+            },
+            {
+              "rep": "10",
+              "kg": "70"
+            },
+            {
+              "rep": "10",
+              "kg": "70"
+            },
+            {
+              "rep": "10",
+              "kg": "80"
+            }
+          ],
+          "nota": ""
+        },
+        {
+          "nome": "Leg press",
+          "serie": 3,
+          "reps": 12,
+          "riposo": 90,
+          "tipo": "reps",
+          "serie_log": [
+            {
+              "rep": "12",
+              "kg": "120"
+            },
+            {
+              "rep": "12",
+              "kg": "120"
+            },
+            {
+              "rep": "12",
+              "kg": "120"
+            }
+          ],
+          "nota": ""
+        },
+        {
+          "nome": "Leg curl",
+          "serie": 3,
+          "reps": 12,
+          "riposo": 75,
+          "tipo": "reps",
+          "serie_log": [
+            {
+              "rep": "12",
+              "kg": "84"
+            },
+            {
+              "rep": "10",
+              "kg": "84"
+            },
+            {
+              "rep": "10",
+              "kg": "84"
+            }
+          ],
+          "nota": ""
+        },
+        {
+          "nome": "Affondi camminati",
+          "serie": 3,
+          "reps": 10,
+          "riposo": 75,
+          "tipo": "reps",
+          "serie_log": [
+            {
+              "rep": "20",
+              "kg": "14"
+            },
+            {
+              "rep": "20",
+              "kg": "14"
+            },
+            {
+              "rep": "20",
+              "kg": "14"
+            }
+          ],
+          "nota": ""
+        },
+        {
+          "nome": "Polpacci in piedi",
+          "serie": 4,
+          "reps": 15,
+          "riposo": 45,
+          "tipo": "reps",
+          "serie_log": [
+            {
+              "rep": "15",
+              "kg": "40.4"
+            },
+            {
+              "rep": "15",
+              "kg": "50.4"
+            },
+            {
+              "rep": "15",
+              "kg": "50.4"
+            },
+            {
+              "rep": "15",
+              "kg": "50.4"
+            }
+          ],
+          "nota": ""
+        }
+      ]
+    },
+    {
+      "sid": 1004,
+      "data": "18 set 2026",
+      "ts": 1789714238638,
+      "esercizi": [
+        {
+          "nome": "Chest press inclinata presa verticale (macchina)",
+          "serie": 4,
+          "reps": 11,
+          "riposo": 90,
+          "tipo": "reps",
+          "serie_log": [
+            {
+              "rep": "12",
+              "kg": "45"
+            },
+            {
+              "rep": "12",
+              "kg": "50"
+            },
+            {
+              "rep": "11",
+              "kg": "50"
+            },
+            {
+              "rep": "9",
+              "kg": "50"
+            }
+          ],
+          "nota": "Ceduto ultima"
+        },
+        {
+          "nome": "Alzate laterali (macchina)",
+          "serie": 3,
+          "reps": 13,
+          "riposo": 60,
+          "tipo": "reps",
+          "serie_log": [
+            {
+              "rep": "15",
+              "kg": "10"
+            },
+            {
+              "rep": "15",
+              "kg": "12.5"
+            },
+            {
+              "rep": "12",
+              "kg": "15"
+            }
+          ],
+          "nota": ""
+        },
+        {
+          "nome": "Pec fly / Pec deck",
+          "serie": 3,
+          "reps": 13,
+          "riposo": 60,
+          "tipo": "reps",
+          "serie_log": [
+            {
+              "rep": "12",
+              "kg": "86"
+            },
+            {
+              "rep": "12",
+              "kg": "86"
+            },
+            {
+              "rep": "10",
+              "kg": "86"
+            }
+          ],
+          "nota": ""
+        },
+        {
+          "nome": "Trazioni/lat machine presa stretta o supina",
+          "serie": 3,
+          "reps": 11,
+          "riposo": 90,
+          "tipo": "reps",
+          "serie_log": [
+            {
+              "rep": "12",
+              "kg": "66"
+            },
+            {
+              "rep": "11",
+              "kg": "68.3"
+            },
+            {
+              "rep": "10",
+              "kg": "68.3"
+            }
+          ],
+          "nota": ""
+        },
+        {
+          "nome": "Curl martello / bilanciere",
+          "serie": 3,
+          "reps": 11,
+          "riposo": 60,
+          "tipo": "reps",
+          "serie_log": [
+            {
+              "rep": "10",
+              "kg": "12"
+            },
+            {
+              "rep": "10",
+              "kg": "12"
+            },
+            {
+              "rep": "10",
+              "kg": "12"
+            }
+          ],
+          "nota": "Sinistro assistito ultime 2"
+        },
+        {
+          "nome": "Dip",
+          "serie": 3,
+          "reps": 11,
+          "riposo": 60,
+          "tipo": "reps",
+          "serie_log": [
+            {
+              "rep": "12",
+              "kg": "9"
+            },
+            {
+              "rep": "11",
+              "kg": "4.5"
+            },
+            {
+              "rep": "9",
+              "kg": "4.5"
+            }
+          ],
+          "nota": ""
+        },
+        {
+          "nome": "Addominali (crunch cavo o ruota)",
+          "serie": 3,
+          "reps": 15,
+          "riposo": 45,
+          "tipo": "reps",
+          "serie_log": [
+            {
+              "rep": "15",
+              "kg": "64"
+            },
+            {
+              "rep": "15",
+              "kg": "68"
+            },
+            {
+              "rep": "15",
+              "kg": "68"
+            }
+          ],
+          "nota": ""
+        }
+      ]
+    }
+  ]
+};
+
+let schede = [];
+let sessioni = [];
+let view = {page:'dashboard'};
+let charts = [];
+let storageOk = true;
+
+function tryLocalStorage(){
+  try{ localStorage.setItem('__test__','1'); localStorage.removeItem('__test__'); return true; }
+  catch(e){ return false; }
+}
+storageOk = tryLocalStorage();
+if(!storageOk) document.getElementById('storageWarn').style.display = 'block';
+
+function pushView(v){
+  view = v;
+  try{ history.pushState({v:v}, '', '#'+v.page+(v.id?('-'+v.id):'')); }catch(e){}
+  render();
+}
+function goBack(){
+  try{ history.back(); }catch(e){ view={page:'dashboard'}; render(); }
+}
+window.addEventListener('popstate', function(e){
+  if(e.state && e.state.v){ view = e.state.v; } else { view = {page:'dashboard'}; }
+  render();
+});
+
+function ensureSeed14Set(){
+  const already = sessioni.some(x=>x.sid===1001 && x.data==='14 set 2026');
+  if(already) return;
+  const scheda = schede.find(s=>s.id===1001);
+  if(!scheda) return;
+  sessioni.push({sid:1001, data:'14 set 2026', ts: Date.UTC(2026,8,14), esercizi:[
+    {nome:'Chest press piana (macchina)', serie:4, reps:10, riposo:90, tipo:'reps', nota:'', serie_log:[{rep:10,kg:66},{rep:10,kg:66},{rep:10,kg:66},{rep:8,kg:66}]},
+    {nome:'Rematore chest-supported (macchina)', serie:4, reps:10, riposo:90, tipo:'reps', nota:'', serie_log:[{rep:10,kg:70},{rep:10,kg:80},{rep:10,kg:80},{rep:10,kg:90}]},
+    {nome:'Military press (macchina)', serie:3, reps:12, riposo:75, tipo:'reps', nota:'', serie_log:[{rep:10,kg:33.1},{rep:10,kg:33.1},{rep:6,kg:34.2}]},
+    {nome:'Lat machine presa larga', serie:3, reps:12, riposo:75, tipo:'reps', nota:'', serie_log:[{rep:12,kg:54.3},{rep:12,kg:56.6},{rep:12,kg:59}]},
+    {nome:'Curl bicipiti (concentrazione, un braccio)', serie:3, reps:12, riposo:60, tipo:'reps', nota:'ultime 2 e la terza serie assistite', serie_log:[{rep:10,kg:14},{rep:10,kg:14},{rep:9,kg:14}]},
+    {nome:'Push down tricipiti', serie:3, reps:12, riposo:60, tipo:'reps', nota:'', serie_log:[{rep:12,kg:43.3},{rep:10,kg:43.3},{rep:10,kg:43.3}]},
+    {nome:'Plank', serie:3, reps:45, riposo:45, tipo:'tempo', nota:'fatto', serie_log:[{rep:'',kg:''},{rep:'',kg:''},{rep:'',kg:''}]}
+  ]});
+  saveSessioni();
+}
+
+function load(){
+  let sRaw=null, seRaw=null;
+  if(storageOk){
+    try{ sRaw = localStorage.getItem('gym7:schede'); }catch(e){}
+    try{ seRaw = localStorage.getItem('gym7:sessioni'); }catch(e){}
+  }
+  const parsedSchede = sRaw? JSON.parse(sRaw): [];
+  const parsedSessioni = seRaw? JSON.parse(seRaw): [];
+  if(parsedSchede.length===0 && parsedSessioni.length===0 && DEFAULT_DATA.schede.length>0){
+    schede = JSON.parse(JSON.stringify(DEFAULT_DATA.schede));
+    sessioni = JSON.parse(JSON.stringify(DEFAULT_DATA.sessioni));
+    saveSchede(); saveSessioni();
+  } else {
+    schede = parsedSchede;
+    sessioni = parsedSessioni;
+  }
+  schede.forEach(s=>s.esercizi.forEach(ex=>{ if(!ex.tipo) ex.tipo = 'reps'; }));
+  ensureSeed14Set();
+  render();
+  syncSessioniFromDb();
+}
+async function getDb(){
+  try{ return await claude.use('db'); }catch(e){ return null; }
+}
+async function syncSessioniFromDb(){
+  const db = await getDb();
+  if(!db) return;
+  try{
+    const snap = await db.collection('sessioni').get();
+    let changed = false;
+    snap.docs.forEach(d=>{
+      const data = d.data();
+      if(data && data.ts!=null){
+        const exists = sessioni.some(x=>x.sid===data.sid && x.ts===data.ts);
+        if(!exists){ sessioni.push(data); changed = true; }
+      }
+    });
+    if(changed){
+      saveSessioni();
+      if(view.page==='dashboard' || view.page==='storico' || view.page==='trend') render();
+    }
+  }catch(e){}
+}
+async function pushSessioneToDb(sessione){
+  const db = await getDb();
+  if(!db) return;
+  try{ await db.collection('sessioni').doc(String(sessione.ts)).set(sessione); }catch(e){}
+}
+async function deleteSessioneFromDb(ts){
+  const db = await getDb();
+  if(!db) return;
+  try{ await db.collection('sessioni').doc(String(ts)).delete(); }catch(e){}
+}
+function saveSchede(){ if(storageOk){ try{ localStorage.setItem('gym7:schede', JSON.stringify(schede)); }catch(e){} } }
+function saveInProgress(schedaId, sessionStartTs, log){
+  if(!storageOk) return;
+  try{
+    const data = {
+      schedaId, sessionStartTs, savedAt: Date.now(),
+      log: log.map(ex=>({nome:ex.nome, serie:ex.serie, reps:ex.reps, riposo:ex.riposo, tipo:ex.tipo, nota:ex.nota, serie_log:ex.serie_log}))
+    };
+    localStorage.setItem('gym7:inprogress', JSON.stringify(data));
+  }catch(e){}
+}
+function loadInProgress(){
+  if(!storageOk) return null;
+  try{ const raw = localStorage.getItem('gym7:inprogress'); return raw? JSON.parse(raw): null; }catch(e){ return null; }
+}
+function clearInProgress(){
+  if(!storageOk) return;
+  try{ localStorage.removeItem('gym7:inprogress'); }catch(e){}
+}
+function saveSessioni(){ if(storageOk){ try{ localStorage.setItem('gym7:sessioni', JSON.stringify(sessioni)); }catch(e){} } }
+
+function esc(s){ const d=document.createElement('div'); d.textContent = s==null?'':String(s); return d.innerHTML; }
+function root(){ return document.getElementById('gym-root'); }
+function destroyCharts(){ charts.forEach(c=>c.destroy()); charts = []; }
+function normSlot(v){
+  if(v==null) return {rep:'', kg:''};
+  if(typeof v === 'object') return {rep: v.rep!=null? v.rep: '', kg: v.kg!=null? v.kg: ''};
+  return {rep: String(v), kg:''};
+}
+function formatDuration(ms){
+  const totalSec = Math.max(0, Math.floor(ms/1000));
+  const h = Math.floor(totalSec/3600), m = Math.floor((totalSec%3600)/60), sec = totalSec%60;
+  const mm = String(m).padStart(2,'0'), ss = String(sec).padStart(2,'0');
+  return h>0 ? (h+':'+mm+':'+ss) : (mm+':'+ss);
+}
+function buildSessionImage(scheda, ses, colorHex){
+  const width = 720;
+  const padding = 32;
+  const measureCanvas = document.createElement('canvas');
+  const mctx = measureCanvas.getContext('2d');
+  function wrapText(text, font, maxWidth){
+    mctx.font = font;
+    const words = String(text).split(' ');
+    const lines = [];
+    let cur = '';
+    words.forEach(w=>{
+      const test = cur ? (cur+' '+w) : w;
+      if(mctx.measureText(test).width > maxWidth && cur){ lines.push(cur); cur = w; }
+      else cur = test;
+    });
+    if(cur) lines.push(cur);
+    return lines;
+  }
+
+  const blocks = [];
+  blocks.push({type:'brand', text:'PUMP APP', h:20});
+  blocks.push({type:'title', text:scheda.nome, h:32});
+  const subtitle = ses.data + (ses.durata ? '  \u00b7  ' + formatDuration(ses.durata*1000) : '');
+  blocks.push({type:'subtitle', text:subtitle, h:28});
+
+  ses.esercizi.forEach(ex=>{
+    blocks.push({type:'exname', text:ex.nome, h:24});
+    const u = unitLabel(ex.tipo);
+    const setsText = ex.serie_log.map((v,i)=>{
+      const slot = normSlot(v);
+      const hasVal = slot.rep!=='' || slot.kg!=='';
+      const label = hasVal ? ((slot.kg!==''? (slot.kg+'kg\u00b7') : '') + (slot.rep!==''? (slot.rep+u) : '\u2014')) : '\u2014';
+      return 'S'+(i+1)+' '+label;
+    }).join('   ');
+    wrapText(setsText, '13px sans-serif', width-2*padding).forEach(line=>{
+      blocks.push({type:'sets', text:line, h:20});
+    });
+    if(ex.nota && ex.nota.trim()!==''){
+      wrapText(ex.nota, 'italic 12px sans-serif', width-2*padding).forEach(line=>{
+        blocks.push({type:'note', text:line, h:18});
+      });
+    }
+    blocks.push({type:'gap', text:'', h:12});
+  });
+
+  let totalH = padding;
+  blocks.forEach(b=>{ totalH += b.h; });
+  totalH += padding;
+
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = Math.ceil(totalH);
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#0f0f0f';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  let y = padding;
+  blocks.forEach(b=>{
+    if(b.type==='brand'){ ctx.font='11px sans-serif'; ctx.fillStyle='#666666'; ctx.fillText(b.text, padding, y+10); }
+    else if(b.type==='title'){ ctx.font='bold 22px sans-serif'; ctx.fillStyle=colorHex; ctx.fillText(b.text, padding, y+18); }
+    else if(b.type==='subtitle'){ ctx.font='13px sans-serif'; ctx.fillStyle='#aaaaaa'; ctx.fillText(b.text, padding, y+12); }
+    else if(b.type==='exname'){ ctx.font='bold 15px sans-serif'; ctx.fillStyle='#f5f5f5'; ctx.fillText(b.text, padding, y+13); }
+    else if(b.type==='sets'){ ctx.font='13px sans-serif'; ctx.fillStyle='#f5f5f5'; ctx.fillText(b.text, padding, y+11); }
+    else if(b.type==='note'){ ctx.font='italic 12px sans-serif'; ctx.fillStyle='#888888'; ctx.fillText(b.text, padding, y+10); }
+    y += b.h;
+  });
+  return canvas;
+}
+
+function unitLabel(tipo){ return tipo==='tempo' ? 's' : 'reps'; }
+function copyText(text){
+  try{ navigator.clipboard.writeText(text); return true; }
+  catch(e){
+    try{
+      const ta = document.createElement('textarea');
+      ta.value = text; ta.style.position='fixed'; ta.style.opacity='0';
+      document.body.appendChild(ta); ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      return true;
+    }catch(e2){ return false; }
+  }
+}
+function enableDragSort(container, arr, drawFn, afterReorder){
+  let draggingId = null;
+  function onMove(e){
+    if(draggingId==null) return;
+    e.preventDefault();
+    const pt = e.touches ? e.touches[0] : e;
+    const el = document.elementFromPoint(pt.clientX, pt.clientY);
+    const tag = el && el.closest ? el.closest('[data-tagid]') : null;
+    if(tag){
+      const overId = Number(tag.getAttribute('data-tagid'));
+      if(overId !== draggingId){
+        const fromIdx = arr.findIndex(x=>x.id===draggingId);
+        const toIdx = arr.findIndex(x=>x.id===overId);
+        if(fromIdx>-1 && toIdx>-1){
+          const item = arr.splice(fromIdx,1)[0];
+          arr.splice(toIdx,0,item);
+          drawFn();
+          const newTag = container.querySelector('[data-tagid="'+draggingId+'"]');
+          if(newTag) newTag.classList.add('dragging');
+        }
+      }
+    }
+  }
+  function onUp(){
+    draggingId = null;
+    document.removeEventListener('pointermove', onMove);
+    document.removeEventListener('pointerup', onUp);
+    if(afterReorder) afterReorder();
+  }
+  container.querySelectorAll('[data-draghandle]').forEach(handle=>{
+    handle.onpointerdown = (e)=>{
+      e.preventDefault();
+      draggingId = Number(handle.getAttribute('data-draghandle'));
+      const tag = handle.closest('[data-tagid]');
+      if(tag) tag.classList.add('dragging');
+      document.addEventListener('pointermove', onMove, {passive:false});
+      document.addEventListener('pointerup', onUp);
+    };
+  });
+}
+
+function render(){
+  destroyCharts();
+  const r = root();
+  if(view.page==='dashboard') return renderDashboard(r);
+  if(view.page==='editor') return renderEditor(r);
+  if(view.page==='detail') return renderDetail(r);
+  if(view.page==='session') return renderSession(r);
+  if(view.page==='storico') return renderStorico(r);
+  if(view.page==='sessionDetail') return renderSessionDetail(r);
+  if(view.page==='trend') return renderTrend(r);
+  if(view.page==='settings') return renderSettings(r);
+}
+
+function renderDashboard(r){
+  let html = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">' +
+    '<div class="gym-brand" style="margin-bottom:0">Pump App</div>' +
+    '<div style="font-size:10px;color:var(--g-muted)">'+APP_VERSION+'</div></div>';
+  if(schede.length===0){
+    html = '<div class="gym-topbar"><div class="gym-title">Le mie schede</div><i class="" id="gear" aria-label="Impostazioni">⚙︎</i></div>' +
+      '<div class="gym-empty"><p>Nessuna scheda ancora</p></div>' +
+      '<button class="gym-fab" style="background:#D85A30" aria-label="Aggiungi scheda" id="add0"><i class="" aria-hidden="true">+</i></button>';
+    r.innerHTML = html;
+    document.getElementById('add0').onclick = ()=>{ pushView({page:'editor', mode:'new'}); };
+    document.getElementById('gear').onclick = ()=>{ pushView({page:'settings'}); };
+    return;
+  }
+  html += '<div class="gym-topbar"><div class="gym-title">Le mie schede</div>' +
+    '<i class="" id="gear" aria-label="Impostazioni">⚙︎</i>' +
+    '<button class="gym-fab gym-fab-small" style="background:#D85A30" aria-label="Aggiungi scheda" id="addH"><i class="" aria-hidden="true">+</i></button></div>';
+  const totSess = sessioni.length;
+  html += '<div style="font-size:11px;color:var(--g-muted);margin-bottom:10px">'+schede.length+' sched'+(schede.length===1?'a':'e')+' &middot; '+totSess+' session'+(totSess===1?'e':'i')+' salvat'+(totSess===1?'a':'e')+' in questa copia &middot; <span id="notMineLink" style="text-decoration:underline;cursor:pointer">non sono i miei dati?</span></div>';
+  const inProg = loadInProgress();
+  let inProgScheda = null;
+  if(inProg){
+    inProgScheda = schede.find(x=>x.id===inProg.schedaId);
+    if(!inProgScheda) clearInProgress();
+  }
+  if(inProgScheda){
+    const cIp = COLORS[inProgScheda.color||0];
+    html += '<div class="gym-card" style="border-left:3px solid #EF9F27;background:rgba(239,159,39,0.08);cursor:default">' +
+      '<div style="font-size:13px;font-weight:600;color:#EF9F27">Sessione in corso</div>' +
+      '<div style="font-size:13px;margin:4px 0">'+esc(inProgScheda.nome)+' &middot; \u23F1 '+formatDuration(Date.now()-inProg.sessionStartTs)+'</div>' +
+      '<button class="gym-btn gym-btn-primary" style="background:'+cIp.main+'" id="resumeSess">Riprendi</button> ' +
+      '<button class="gym-btn" id="discardSess">Scarta</button>' +
+      '</div>';
+  }
+  schede.forEach(s=>{
+    const c = COLORS[s.color||0];
+    const nSess = sessioni.filter(x=>x.sid===s.id).length;
+    html += '<div class="gym-card" data-id="'+s.id+'" style="border-left:3px solid '+c.main+'">' +
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start">' +
+      '<div style="font-size:15px;font-weight:600;color:'+c.main+'">'+esc(s.nome)+'</div>' +
+      '<div class="gym-card-actions">' +
+      '<i class="" data-trend="'+s.id+'" aria-label="Vedi trend" style="color:'+c.main+';font-size:18px;cursor:pointer">↗</i>' +
+      '<i class="" data-del="'+s.id+'" aria-label="Elimina scheda" style="color:var(--g-muted);font-size:17px;cursor:pointer">✕</i></div></div>' +
+      '<div style="margin:6px 0">' + s.giorni.map(d=>'<span class="gym-chip" style="background:'+c.bg+';color:'+c.main+'">'+d+'</span>').join('') + '</div>' +
+      '<div style="font-size:12px;color:var(--g-text2)">'+s.esercizi.length+' esercizi &middot; '+nSess+' sessioni</div>' +
+      '</div>';
+  });
+  r.innerHTML = html;
+  document.getElementById('addH').onclick = ()=>{ pushView({page:'editor', mode:'new'}); };
+  document.getElementById('gear').onclick = ()=>{ pushView({page:'settings'}); };
+  const notMineLink = document.getElementById('notMineLink');
+  if(notMineLink) notMineLink.onclick = ()=>{ pushView({page:'settings', jumpToReset:true}); };
+  const resumeBtn = document.getElementById('resumeSess');
+  if(resumeBtn) resumeBtn.onclick = ()=>{ pushView({page:'session', id:inProgScheda.id}); };
+  const discardBtn = document.getElementById('discardSess');
+  if(discardBtn) discardBtn.onclick = ()=>{ clearInProgress(); render(); };
+  r.querySelectorAll('[data-del]').forEach(el=>el.onclick=(e)=>{
+    e.stopPropagation();
+    const id = Number(el.getAttribute('data-del'));
+    schede = schede.filter(s=>s.id!==id);
+    sessioni = sessioni.filter(s=>s.sid!==id);
+    saveSchede(); saveSessioni(); render();
+  });
+  r.querySelectorAll('[data-trend]').forEach(el=>el.onclick=(e)=>{
+    e.stopPropagation();
+    const id = Number(el.getAttribute('data-trend'));
+    pushView({page:'trend', id});
+  });
+  r.querySelectorAll('.gym-card').forEach(el=>el.onclick=()=>{
+    const id = Number(el.getAttribute('data-id'));
+    pushView({page:'detail', id});
+  });
+}
+
+function renderSettings(r){
+  let resetStep = view.jumpToReset ? 1 : 0;
+  function draw(){
+    const exportData = JSON.stringify({schede, sessioni}, null, 2);
+    let html = '<div class="gym-topbar"><i class="" id="back" aria-label="Indietro">←</i><div class="gym-title">Impostazioni</div></div>';
+    html += '<label class="gym-label">Esporta dati</label>';
+    html += '<textarea class="gym-textarea" id="exportBox" rows="5" readonly>'+esc(exportData)+'</textarea>';
+    html += '<button class="gym-btn" id="copyBtn">Copia negli appunti</button>';
+    html += '<div id="copyMsg" style="font-size:12px;color:#5DCAA5;margin:6px 0"></div>';
+    html += '<div style="margin-top:22px"><label class="gym-label">Importa dati</label>';
+    html += '<textarea class="gym-textarea" id="importBox" rows="5" placeholder="Incolla qui il JSON esportato in precedenza"></textarea>';
+    html += '<button class="gym-btn" id="importBtn">Importa</button>';
+    html += '<div id="importMsg" style="font-size:12px;margin:6px 0"></div></div>';
+    html += '<div style="margin-top:22px"><label class="gym-label">Template vuoto (per iniziare da zero)</label>';
+    html += '<div style="font-size:12px;color:var(--g-text2);margin-bottom:8px">Uno scheletro JSON con i campi giusti, da riempire e reincollare qui sopra in "Importa dati".</div>';
+    html += '<button class="gym-btn" id="templateBtn">Copia template vuoto</button>';
+    html += '<div id="templateMsg" style="font-size:12px;color:#5DCAA5;margin:6px 0"></div></div>';
+    html += '<div style="margin-top:30px;padding-top:16px;border-top:1px solid var(--g-border)">';
+    if(resetStep===0){
+      html += '<span class="gym-settings-link" id="resetLink">Cancella tutti i dati</span>';
+    } else if(resetStep===1){
+      html += '<div style="font-size:13px;margin-bottom:8px">Sicuro che vuoi cancellare tutto?</div>' +
+        '<button class="gym-btn" id="resetNo">Annulla</button> <button class="gym-btn gym-btn-danger" id="resetYes">Continua</button>';
+    } else if(resetStep===2){
+      html += '<div style="font-size:13px;margin-bottom:8px">Bro, sicuro sicuro?</div>' +
+        '<button class="gym-btn" id="resetNo">Annulla</button> <button class="gym-btn gym-btn-danger" id="resetYes">Continua</button>';
+    } else if(resetStep===3){
+      html += '<div style="font-size:13px;margin-bottom:8px">Ok, conferma che non stai schiacciando a caso!</div>' +
+        '<button class="gym-btn" id="resetNo">Annulla</button> <button class="gym-btn gym-btn-danger" id="resetFinal">Cancella tutto</button>';
+    }
+    html += '</div>';
+    r.innerHTML = html;
+    document.getElementById('back').onclick = ()=>{ goBack(); };
+    document.getElementById('copyBtn').onclick = ()=>{
+      const ok = copyText(exportData);
+      document.getElementById('copyMsg').textContent = ok ? 'Copiato negli appunti.' : 'Copia non riuscita, seleziona il testo manualmente.';
+    };
+    document.getElementById('templateBtn').onclick = ()=>{
+      const ok = copyText(JSON.stringify(IMPORT_TEMPLATE, null, 2));
+      document.getElementById('templateMsg').textContent = ok ? 'Template copiato negli appunti.' : 'Copia non riuscita, seleziona il testo manualmente.';
+    };
+    document.getElementById('importBtn').onclick = ()=>{
+      const raw = document.getElementById('importBox').value.trim();
+      const m = document.getElementById('importMsg');
+      if(!raw){ m.style.color='#E24B4A'; m.textContent = 'Incolla prima il JSON da importare'; return; }
+      try{
+        const parsed = JSON.parse(raw);
+        if(!Array.isArray(parsed.schede) || !Array.isArray(parsed.sessioni)) throw new Error('formato non valido');
+        parsed.schede.forEach(s=>s.esercizi.forEach(ex=>{ if(!ex.tipo) ex.tipo='reps'; }));
+        schede = parsed.schede; sessioni = parsed.sessioni;
+        saveSchede(); saveSessioni();
+        m.style.color='#5DCAA5'; m.textContent = 'Dati importati correttamente.';
+        draw();
+      }catch(err){
+        m.style.color='#E24B4A'; m.textContent = 'JSON non valido: '+err.message;
+      }
+    };
+    const resetLink = document.getElementById('resetLink');
+    if(resetLink) resetLink.onclick = ()=>{ resetStep = 1; draw(); };
+    const resetNo = document.getElementById('resetNo');
+    if(resetNo) resetNo.onclick = ()=>{ resetStep = 0; draw(); };
+    const resetYes = document.getElementById('resetYes');
+    if(resetYes) resetYes.onclick = ()=>{ resetStep += 1; draw(); };
+    const resetFinal = document.getElementById('resetFinal');
+    if(resetFinal) resetFinal.onclick = ()=>{
+      schede = []; sessioni = [];
+      saveSchede(); saveSessioni();
+      resetStep = 0;
+      pushView({page:'dashboard'});
+    };
+  }
+  draw();
+}
+
+function exFormHtml(cur){
+  return '<div style="display:flex;gap:8px;margin-bottom:8px">' +
+      '<button type="button" class="gym-btn-toggle'+(cur.tipo!=='tempo'?' on':'')+'" data-tipo="reps" style="'+(cur.tipo!=='tempo'?'background:#5DCAA5':'')+'">Ripetizioni</button>' +
+      '<button type="button" class="gym-btn-toggle'+(cur.tipo==='tempo'?' on':'')+'" data-tipo="tempo" style="'+(cur.tipo==='tempo'?'background:#5DCAA5':'')+'">Tempo</button></div>' +
+    '<input class="gym-input" id="exNome" placeholder="Nome esercizio" value="'+esc(cur.nome)+'">' +
+    '<div style="display:flex;gap:8px"><input class="gym-input" id="exSerie" placeholder="Serie (4-20)" type="number" min="4" max="20" step="1" value="'+esc(cur.serie)+'">' +
+    '<input class="gym-input" id="exReps" placeholder="'+(cur.tipo==='tempo'?'Durata (s)':'Reps target')+'" type="number" value="'+esc(cur.reps)+'">' +
+    '<input class="gym-input" id="exRiposo" placeholder="Riposo (s)" type="number" value="'+esc(cur.riposo)+'"></div>' +
+    '<div id="exErr" style="color:#E24B4A;font-size:12px;margin-bottom:6px"></div>';
+}
+function wireExForm(container, state){
+  let curTipo = state.tipo;
+  container.querySelectorAll('[data-tipo]').forEach(btn=>btn.onclick=()=>{
+    curTipo = btn.getAttribute('data-tipo');
+    container.querySelector('#exReps').placeholder = curTipo==='tempo' ? 'Durata (s)' : 'Reps target';
+    container.querySelectorAll('[data-tipo]').forEach(b=>{
+      const on = b.getAttribute('data-tipo')===curTipo;
+      b.classList.toggle('on', on);
+      b.style.background = on ? '#5DCAA5' : '';
+    });
+  });
+  return ()=>{
+    const n = container.querySelector('#exNome').value.trim();
+    const serieRaw = container.querySelector('#exSerie').value.trim();
+    const s = Number(serieRaw);
+    const rp = Number(container.querySelector('#exReps').value);
+    const ri = Number(container.querySelector('#exRiposo').value);
+    const err = container.querySelector('#exErr');
+    if(!n || !serieRaw || !rp || !ri){ err.textContent = 'Compila tutti i campi'; return null; }
+    if(!Number.isInteger(s) || s<4 || s>20){ err.textContent = 'Le serie devono essere un numero intero tra 4 e 20'; return null; }
+    return {nome:n, serie:s, reps:rp, riposo:ri, tipo:curTipo};
+  };
+}
+
+function renderEditor(r){
+  const editing = view.mode==='edit';
+  const scheda = editing ? schede.find(s=>s.id===view.id) : {id:Date.now(), nome:'', giorni:[], color:0, esercizi:[]};
+  let esList = scheda.esercizi.slice();
+  let selColor = scheda.color||0;
+  let selDays = scheda.giorni.slice();
+  let nomeVal = scheda.nome || '';
+  let addingEx = false;
+  let editIdx = null;
+  let pendingRename = null;
+
+  function draw(){
+    const c = COLORS[selColor];
+    let html = '<div class="gym-topbar"><i class="" id="back" aria-label="Indietro">←</i><div class="gym-title">'+(editing?'Modifica scheda':'Nuova scheda')+'</div></div>';
+    html += '<label class="gym-label">Nome</label><input class="gym-input" id="nome" value="'+esc(nomeVal)+'" placeholder="es. Push">';
+    html += '<label class="gym-label">Colore</label><div style="margin-bottom:12px">' + COLORS.map((cc,i)=>
+      '<span data-col="'+i+'" style="display:inline-block;width:28px;height:28px;border-radius:50%;background:'+cc.main+';margin-right:8px;cursor:pointer;border:2px solid '+(i===selColor?'#fff':'transparent')+'"></span>').join('') + '</div>';
+    html += '<label class="gym-label">Giorni</label><div style="margin-bottom:12px">' + DAYS.map(d=>{
+      const sel = selDays.includes(d);
+      return '<span class="gym-day-chip'+(sel?' sel':'')+'" data-day="'+d+'" style="'+(sel?'background:'+c.main+';border-color:'+c.main:'')+'">'+d.slice(0,3)+'</span>';
+    }).join('') + '</div>';
+    html += '<label class="gym-label">Esercizi <span style="font-weight:400;color:var(--g-muted)">(trascina per riordinare)</span></label>';
+    esList.forEach((ex,i)=>{
+      const unit = ex.tipo==='tempo' ? 's' : '';
+      html += '<div class="gym-tag" data-tagid="'+ex.id+'">' +
+        '<i class="gym-draghandle" data-draghandle="'+ex.id+'" aria-label="Trascina per riordinare">⋮⋮</i>' +
+        '<span style="flex:1">'+esc(ex.nome)+' &middot; '+ex.serie+'x'+ex.reps+unit+' &middot; '+ex.riposo+'s</span>' +
+        '<span style="display:flex;gap:10px;align-items:center;flex-shrink:0">' +
+        '<i class="" data-editex2="'+i+'" aria-label="Modifica esercizio">✎</i>' +
+        '<i class="" data-rmex="'+i+'" aria-label="Rimuovi esercizio">✕</i></span></div>';
+    });
+    if(pendingRename){
+      html += renameConfirmHtml(pendingRename.oldName, pendingRename.v.nome);
+    } else if(addingEx){
+      const cur = editIdx!==null ? esList[editIdx] : {nome:'', serie:'', reps:'', riposo:'', tipo:'reps'};
+      html += '<div style="background:var(--g-surf2);border-radius:8px;padding:10px;margin:8px 0">' + exFormHtml(cur) +
+        '<button class="gym-btn" id="exSave">'+(editIdx!==null?'Salva modifiche':'Aggiungi')+'</button> <button class="gym-btn" id="exCancel">Annulla</button></div>';
+    } else {
+      html += '<button class="gym-fab gym-fab-small" style="background:#0F6E56;margin:10px 0" id="addEx" aria-label="Aggiungi esercizio"><i class="" aria-hidden="true">+</i></button>';
+    }
+    html += '<div id="formErr" style="color:#E24B4A;font-size:13px;margin:8px 0"></div>';
+    html += '<button class="gym-btn gym-btn-primary" style="background:'+c.main+';width:100%;margin-top:10px" id="saveScheda">Salva scheda</button>';
+    r.innerHTML = html;
+
+    function applyPending(){
+      if(editIdx!==null) esList[editIdx] = Object.assign({}, esList[editIdx], pendingRename.v);
+      else esList.push(Object.assign({id:Date.now()+Math.random()}, pendingRename.v));
+      pendingRename = null; addingEx = false; editIdx = null; draw();
+    }
+
+    document.getElementById('nome').oninput = (e)=>{ nomeVal = e.target.value; };
+    document.getElementById('back').onclick = ()=>{ goBack(); };
+    r.querySelectorAll('[data-col]').forEach(el=>el.onclick=()=>{ selColor = Number(el.getAttribute('data-col')); draw(); });
+    r.querySelectorAll('[data-day]').forEach(el=>el.onclick=()=>{
+      const d = el.getAttribute('data-day');
+      selDays = selDays.includes(d) ? selDays.filter(x=>x!==d) : selDays.concat([d]);
+      draw();
+    });
+    r.querySelectorAll('[data-rmex]').forEach(el=>el.onclick=()=>{
+      esList.splice(Number(el.getAttribute('data-rmex')),1); draw();
+    });
+    r.querySelectorAll('[data-editex2]').forEach(el=>el.onclick=()=>{
+      const i = Number(el.getAttribute('data-editex2'));
+      editIdx = i; addingEx = true; draw();
+    });
+    enableDragSort(r, esList, draw, null);
+    const addExBtn = document.getElementById('addEx');
+    if(addExBtn) addExBtn.onclick = ()=>{ editIdx = null; addingEx = true; draw(); };
+    const exCancel = document.getElementById('exCancel');
+    if(exCancel) exCancel.onclick = ()=>{ addingEx = false; editIdx = null; draw(); };
+    if(pendingRename){
+      document.getElementById('keepHist').onclick = ()=>{
+        renameHistory(scheda.id, pendingRename.oldName, pendingRename.v.nome);
+        applyPending();
+      };
+      document.getElementById('newHist').onclick = ()=>{ applyPending(); };
+    }
+    if(addingEx){
+      const cur = editIdx!==null ? esList[editIdx] : {nome:'', serie:'', reps:'', riposo:'', tipo:'reps'};
+      const getVal = wireExForm(r, cur);
+      document.getElementById('exSave').onclick = ()=>{
+        const v = getVal();
+        if(!v) return;
+        if(editIdx!==null && esList[editIdx].nome!==v.nome && hasHistory(scheda.id, esList[editIdx].nome)){
+          pendingRename = {v, oldName: esList[editIdx].nome};
+          draw();
+          return;
+        }
+        if(editIdx!==null) esList[editIdx] = Object.assign({}, esList[editIdx], v);
+        else esList.push(Object.assign({id:Date.now()+Math.random()}, v));
+        addingEx = false; editIdx = null; draw();
+      };
+    }
+    document.getElementById('saveScheda').onclick = ()=>{
+      const nome = nomeVal.trim();
+      const err = document.getElementById('formErr');
+      if(!nome){ err.textContent = 'Il nome è obbligatorio'; return; }
+      if(selDays.length===0){ err.textContent = 'Seleziona almeno un giorno'; return; }
+      scheda.nome = nome; scheda.color = selColor; scheda.giorni = selDays; scheda.esercizi = esList;
+      if(!editing) schede.push(scheda);
+      else { const idx = schede.findIndex(s=>s.id===scheda.id); schede[idx] = scheda; }
+      saveSchede();
+      pushView({page:'detail', id:scheda.id});
+    };
+  }
+  draw();
+}
+
+function renderDetail(r){
+  const s = schede.find(x=>x.id===view.id);
+  if(!s){ view={page:'dashboard'}; return render(); }
+  const c = COLORS[s.color||0];
+  const nSess = sessioni.filter(x=>x.sid===s.id).length;
+  let addingEx = false;
+  let editIdx = null;
+  let pendingRename = null;
+
+  function draw(){
+    let html = '<div class="gym-topbar"><i class="" id="back" aria-label="Indietro">←</i><div class="gym-title" style="color:'+c.main+'">'+esc(s.nome)+'</div>' +
+      '<i class="" data-trendbtn="1" aria-label="Vedi trend" style="color:'+c.main+'">↗</i></div>';
+    html += '<div style="margin-bottom:10px">' + s.giorni.map(d=>'<span class="gym-chip" style="background:'+c.bg+';color:'+c.main+'">'+d+'</span>').join('') + '</div>';
+    html += '<div style="font-size:11px;color:var(--g-muted);margin-bottom:4px">Trascina per riordinare</div>';
+    s.esercizi.forEach((ex,i)=>{
+      const unit = ex.tipo==='tempo' ? 's' : '';
+      html += '<div class="gym-exrow" data-tagid="'+ex.id+'">' +
+        '<span style="display:flex;align-items:center;gap:8px">' +
+        '<i class="gym-draghandle" data-draghandle="'+ex.id+'" aria-label="Trascina per riordinare">⋮⋮</i>' +
+        esc(ex.nome) + '</span>' +
+        '<span style="display:flex;align-items:center;gap:10px">' +
+        '<span style="font-size:12px;color:var(--g-text2)">'+ex.serie+'x'+ex.reps+unit+' &middot; riposo '+ex.riposo+'s</span>' +
+        '<i class="" data-editex2="'+i+'" aria-label="Modifica" style="cursor:pointer;color:var(--g-muted)">✎</i>' +
+        '<i class="" data-rmex="'+i+'" aria-label="Rimuovi" style="cursor:pointer;color:var(--g-muted)">✕</i></span></div>';
+    });
+    if(pendingRename){
+      html += renameConfirmHtml(pendingRename.oldName, pendingRename.v.nome);
+    } else if(addingEx){
+      const cur = editIdx!==null ? s.esercizi[editIdx] : {nome:'', serie:'', reps:'', riposo:'', tipo:'reps'};
+      html += '<div style="background:var(--g-surf2);border-radius:8px;padding:10px;margin:10px 0">' + exFormHtml(cur) +
+        '<button class="gym-btn" id="exSave">'+(editIdx!==null?'Salva modifiche':'Aggiungi')+'</button> <button class="gym-btn" id="exCancel">Annulla</button></div>';
+    } else {
+      html += '<button class="gym-fab gym-fab-small" style="background:'+c.main+';margin:12px 0" id="addEx" aria-label="Aggiungi esercizio"><i class="" aria-hidden="true">+</i></button>';
+    }
+    html += '<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">' +
+      '<button class="gym-btn gym-btn-primary" style="background:'+c.main+'" id="allena"><i class="" aria-hidden="true">▶</i> Allena</button>' +
+      '<button class="gym-btn" id="modifica"><i class="" aria-hidden="true">✎</i> Modifica</button>' +
+      '<button class="gym-btn" id="sessioniBtn"><i class="" aria-hidden="true">↻</i> Sessioni ('+nSess+')</button></div>';
+    html += '<div class="gym-footer"><button class="gym-btn" id="toDash">Dashboard</button></div>';
+    r.innerHTML = html;
+
+    function applyPending(){
+      if(editIdx!==null) s.esercizi[editIdx] = Object.assign({}, s.esercizi[editIdx], pendingRename.v);
+      else s.esercizi.push(Object.assign({id:Date.now()+Math.random()}, pendingRename.v));
+      saveSchede();
+      pendingRename = null; addingEx = false; editIdx = null; draw();
+    }
+
+    document.getElementById('back').onclick = ()=>{ goBack(); };
+    document.getElementById('toDash').onclick = ()=>{ pushView({page:'dashboard'}); };
+    document.getElementById('allena').onclick = ()=>{ pushView({page:'session', id:s.id}); };
+    document.getElementById('modifica').onclick = ()=>{ pushView({page:'editor', mode:'edit', id:s.id}); };
+    document.getElementById('sessioniBtn').onclick = ()=>{ pushView({page:'storico', id:s.id}); };
+    const trendBtnTop = r.querySelector('[data-trendbtn]');
+    if(trendBtnTop) trendBtnTop.onclick = ()=>{ pushView({page:'trend', id:s.id}); };
+    r.querySelectorAll('[data-rmex]').forEach(el=>el.onclick=()=>{
+      s.esercizi.splice(Number(el.getAttribute('data-rmex')),1); saveSchede(); draw();
+    });
+    r.querySelectorAll('[data-editex2]').forEach(el=>el.onclick=()=>{
+      editIdx = Number(el.getAttribute('data-editex2')); addingEx = true; draw();
+    });
+    enableDragSort(r, s.esercizi, draw, ()=>saveSchede());
+    const addExBtn = document.getElementById('addEx');
+    if(addExBtn) addExBtn.onclick = ()=>{ editIdx = null; addingEx = true; draw(); };
+    const exCancel = document.getElementById('exCancel');
+    if(exCancel) exCancel.onclick = ()=>{ addingEx = false; editIdx = null; draw(); };
+    if(pendingRename){
+      document.getElementById('keepHist').onclick = ()=>{
+        renameHistory(s.id, pendingRename.oldName, pendingRename.v.nome);
+        applyPending();
+      };
+      document.getElementById('newHist').onclick = ()=>{ applyPending(); };
+    }
+    if(addingEx){
+      const cur = editIdx!==null ? s.esercizi[editIdx] : {nome:'', serie:'', reps:'', riposo:'', tipo:'reps'};
+      const getVal = wireExForm(r, cur);
+      document.getElementById('exSave').onclick = ()=>{
+        const v = getVal();
+        if(!v) return;
+        if(editIdx!==null && s.esercizi[editIdx].nome!==v.nome && hasHistory(s.id, s.esercizi[editIdx].nome)){
+          pendingRename = {v, oldName: s.esercizi[editIdx].nome};
+          draw();
+          return;
+        }
+        if(editIdx!==null) s.esercizi[editIdx] = Object.assign({}, s.esercizi[editIdx], v);
+        else s.esercizi.push(Object.assign({id:Date.now()+Math.random()}, v));
+        saveSchede();
+        addingEx = false; editIdx = null; draw();
+      };
+    }
+  }
+  draw();
+}
+
+function hasHistory(schedaId, nome){
+  return sessioni.some(x=>x.sid===schedaId && x.esercizi.some(e=>e.nome===nome));
+}
+function renameHistory(schedaId, oldName, newName){
+  let changed = false;
+  sessioni.forEach(ses=>{
+    if(ses.sid===schedaId){
+      ses.esercizi.forEach(e=>{ if(e.nome===oldName){ e.nome=newName; changed=true; } });
+    }
+  });
+  if(changed) saveSessioni();
+}
+function renameConfirmHtml(oldName, newName){
+  return '<div style="background:#1a1830;border:1px solid #7F77DD55;border-radius:8px;padding:12px;margin:8px 0">' +
+    '<div style="font-size:13px;margin-bottom:10px">Hai rinominato <b>'+esc(oldName)+'</b> in <b>'+esc(newName)+'</b>. Lo storico delle sessioni passate è collegato al vecchio nome — vuoi mantenerlo?</div>' +
+    '<button class="gym-btn gym-btn-primary" style="background:#5DCAA5" id="keepHist">Mantieni storico</button> ' +
+    '<button class="gym-btn" id="newHist">Inizia storico nuovo</button></div>';
+}
+
+function findPrevSession(schedaId, nomeEsercizio){
+  const mie = sessioni.filter(x=>x.sid===schedaId).slice().sort((a,b)=>b.ts-a.ts);
+  for(const ses of mie){
+    const found = ses.esercizi.find(e=>e.nome===nomeEsercizio);
+    if(found) return found;
+  }
+  return null;
+}
+
+function renderSession(r){
+  const s = schede.find(x=>x.id===view.id);
+  if(!s){ view={page:'dashboard'}; return render(); }
+  const c = COLORS[s.color||0];
+  const saved = loadInProgress();
+  const resuming = !!(saved && saved.schedaId===s.id);
+  const log = resuming ? saved.log.map(ex=>({
+      nome:ex.nome, serie:ex.serie, reps:ex.reps, riposo:ex.riposo, tipo:ex.tipo||'reps',
+      nota: ex.nota || '',
+      serie_log: ex.serie_log,
+      prev: findPrevSession(s.id, ex.nome)
+    })) : s.esercizi.map(ex=>{
+    const prev = findPrevSession(s.id, ex.nome);
+    return {
+      nome:ex.nome, serie:ex.serie, reps:ex.reps, riposo:ex.riposo, tipo:ex.tipo||'reps',
+      nota: (prev && prev.nota) ? prev.nota : '',
+      serie_log: new Array(ex.serie).fill(null).map(()=>({rep:'', kg:''})),
+      prev: prev
+    };
+  });
+  const sessionStartTs = resuming ? saved.sessionStartTs : Date.now();
+  let timerInterval = setInterval(()=>{
+    const el = document.getElementById('sessTimer');
+    if(el) el.textContent = formatDuration(Date.now()-sessionStartTs);
+  }, 1000);
+  function stopTimer(){ if(timerInterval){ clearInterval(timerInterval); timerInterval=null; } }
+
+  function draw(){
+    let html = '<div class="gym-topbar"><i class="" id="back" aria-label="Indietro">←</i><div class="gym-title" style="color:'+c.main+'">Sessione: '+esc(s.nome)+'</div></div>';
+    html += '<div style="font-size:12px;color:var(--g-muted);margin-bottom:12px">\u23F1 <span id="sessTimer">'+formatDuration(Date.now()-sessionStartTs)+'</span></div>';
+    log.forEach((ex,ei)=>{
+      const u = unitLabel(ex.tipo);
+      const anyFilledInit = ex.serie_log.some(v=>v.rep.toString().trim()!=='' || v.kg.toString().trim()!=='');
+      const allFilledInit = ex.serie_log.every(v=>v.rep.toString().trim()!=='');
+      const doneBg = 'rgba(93,202,165,0.10)';
+      const doneBorder = '#5DCAA5';
+      html += '<div id="exblock'+ei+'" style="margin-bottom:16px;padding:8px;border-radius:8px;border-left:3px solid '+(allFilledInit? doneBorder : (anyFilledInit? c.main:'transparent'))+';background:'+(allFilledInit? doneBg : (anyFilledInit? c.bg:'transparent'))+';transition:border-color .2s,background .2s">';
+      html += '<div style="font-size:14px;font-weight:600;margin-bottom:6px;display:flex;align-items:center;gap:6px;flex-wrap:wrap">'+esc(ex.nome)+
+        ' <span id="exCheck'+ei+'" style="display:'+(allFilledInit?'inline-flex':'none')+';align-items:center;gap:4px;background:#5DCAA5;color:#0f2b22;font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px">\u2713 Completato</span>' +
+        ' <span class="gym-chip" style="background:'+c.bg+';color:'+c.main+';font-size:11px;font-weight:600">'+ex.serie+'&times;'+ex.reps+u+'</span>' +
+        ' <span style="font-size:11px;color:var(--g-muted);font-weight:400">riposo '+ex.riposo+'s</span></div>';
+      html += '<div style="display:flex;gap:8px;flex-wrap:wrap">';
+      for(let i=0;i<ex.serie;i++){
+        const prevSlot = ex.prev ? normSlot(ex.prev.serie_log[i]) : null;
+        const hasPrev = prevSlot && (prevSlot.rep!=='' || prevSlot.kg!=='');
+        html += '<div class="gym-slot">' +
+          '<div class="gym-slot-labels"><span>kg</span><span>'+u+'</span></div>' +
+          '<div style="display:flex;gap:3px">' +
+          '<input class="gym-serie-input" data-ex="'+ei+'" data-serie="'+i+'" data-field="kg" type="number" placeholder="0" value="'+ex.serie_log[i].kg+'">' +
+          '<input class="gym-serie-input" data-ex="'+ei+'" data-serie="'+i+'" data-field="rep" type="number" placeholder="0" value="'+ex.serie_log[i].rep+'">' +
+          '</div>' +
+          '<div style="font-size:10px;color:var(--g-muted);margin-top:2px">goal: '+ex.reps+u+'</div>' +
+          (hasPrev ? '<div class="gym-prevchip" data-copyex="'+ei+'" data-copyserie="'+i+'" data-rep="'+esc(prevSlot.rep)+'" data-kg="'+esc(prevSlot.kg)+'">prec: '+(prevSlot.kg?esc(prevSlot.kg)+'kg&times;':'')+esc(prevSlot.rep)+'</div>' : '') +
+          '</div>';
+      }
+      html += '</div>';
+      html += '<input class="gym-input" data-noteex="'+ei+'" placeholder="Nota (es. ceduto, forzate, assistite...)" value="'+esc(ex.nota)+'" style="margin-top:8px">';
+      html += '</div>';
+    });
+    html += '<div id="sessErr" style="color:#E24B4A;font-size:13px;margin:8px 0"></div>';
+    html += '<button class="gym-btn gym-btn-primary" style="background:'+c.main+';width:100%" id="finish">Termina e salva</button>';
+    r.innerHTML = html;
+
+    document.getElementById('back').onclick = ()=>{ stopTimer(); goBack(); };
+    r.querySelectorAll('.gym-serie-input').forEach(inp=>{
+      inp.oninput = ()=>{
+        const ei = Number(inp.getAttribute('data-ex')), si = Number(inp.getAttribute('data-serie')), f = inp.getAttribute('data-field');
+        log[ei].serie_log[si][f] = inp.value;
+        const bothFilled = log[ei].serie_log[si].rep.toString().trim()!=='';
+        r.querySelectorAll('[data-ex="'+ei+'"][data-serie="'+si+'"]').forEach(x=>x.classList.toggle('done', bothFilled));
+        const anyFilled = log[ei].serie_log.some(v=>v.rep.toString().trim()!=='' || v.kg.toString().trim()!=='');
+        const allFilled = log[ei].serie_log.every(v=>v.rep.toString().trim()!=='');
+        const block = document.getElementById('exblock'+ei);
+        if(block){
+          block.style.borderLeftColor = allFilled ? '#5DCAA5' : (anyFilled ? c.main : 'transparent');
+          block.style.background = allFilled ? 'rgba(93,202,165,0.10)' : (anyFilled ? (c.bg||'transparent') : 'transparent');
+        }
+        const check = document.getElementById('exCheck'+ei);
+        if(check) check.style.display = allFilled ? 'inline-flex' : 'none';
+        saveInProgress(s.id, sessionStartTs, log);
+      };
+    });
+    r.querySelectorAll('[data-noteex]').forEach(inp=>{
+      inp.oninput = ()=>{ log[Number(inp.getAttribute('data-noteex'))].nota = inp.value; saveInProgress(s.id, sessionStartTs, log); };
+    });
+    r.querySelectorAll('[data-copyex]').forEach(chip=>chip.onclick=()=>{
+      const ei = Number(chip.getAttribute('data-copyex')), si = Number(chip.getAttribute('data-copyserie'));
+      const rep = chip.getAttribute('data-rep'), kg = chip.getAttribute('data-kg');
+      log[ei].serie_log[si] = {rep, kg};
+      saveInProgress(s.id, sessionStartTs, log);
+      draw();
+    });
+    document.getElementById('finish').onclick = ()=>{
+      const anyFilled = log.some(ex=>ex.serie_log.some(v=>v.rep.toString().trim()!==''));
+      const err = document.getElementById('sessErr');
+      if(!anyFilled){ err.textContent = 'Registra almeno una serie prima di salvare'; return; }
+      stopTimer();
+      const now = new Date();
+      const mesi = ['gen','feb','mar','apr','mag','giu','lug','ago','set','ott','nov','dic'];
+      const dataStr = now.getDate()+' '+mesi[now.getMonth()]+' '+now.getFullYear();
+      const durataSec = Math.round((Date.now()-sessionStartTs)/1000);
+      const toSave = log.map(ex=>({nome:ex.nome, serie:ex.serie, reps:ex.reps, riposo:ex.riposo, tipo:ex.tipo, serie_log:ex.serie_log, nota:ex.nota}));
+      const nuovaSessione = {sid:s.id, data:dataStr, ts:now.getTime(), durata:durataSec, esercizi:toSave};
+      sessioni.push(nuovaSessione);
+      pushSessioneToDb(nuovaSessione);
+      clearInProgress();
+      const mine = sessioni.filter(x=>x.sid===s.id);
+      if(mine.length>30){
+        const toRemove = mine.length-30;
+        let removed=0;
+        sessioni = sessioni.filter(x=>{
+          if(x.sid===s.id && removed<toRemove){ removed++; return false; }
+          return true;
+        });
+      }
+      saveSessioni();
+      goBack();
+    };
+  }
+  draw();
+}
+
+function renderStorico(r){
+  const s = schede.find(x=>x.id===view.id);
+  if(!s){ view={page:'dashboard'}; return render(); }
+  const c = COLORS[s.color||0];
+  let pendingDel = null;
+
+  function draw(){
+    const mie = sessioni.filter(x=>x.sid===s.id).slice().sort((a,b)=>b.ts-a.ts);
+    let html = '<div class="gym-topbar"><i class="" id="back" aria-label="Indietro">\u2190</i><div class="gym-title" style="color:'+c.main+'">Sessioni: '+esc(s.nome)+'</div></div>';
+    if(mie.length===0){
+      html += '<div class="gym-empty"><p>Nessuna sessione registrata</p></div>';
+    } else {
+      mie.forEach(ses=>{
+        const totReps = ses.esercizi.reduce((sum,ex)=>sum + ex.serie_log.reduce((a,v)=>a+(Number(normSlot(v).rep)||0),0), 0);
+        const note = ses.esercizi.filter(ex=>ex.nota && ex.nota.trim()!=='').map(ex=>esc(ex.nome)+': '+esc(ex.nota)).join(' &middot; ');
+        if(pendingDel===ses.ts){
+          html += '<div class="gym-card" style="cursor:default;border-left:3px solid #E24B4A">' +
+            '<div style="font-size:13px;margin-bottom:8px">Eliminare la sessione del '+ses.data+'? Non si può annullare.</div>' +
+            '<button class="gym-btn" data-canceldel="1">Annulla</button> <button class="gym-btn gym-btn-danger" data-confirmdel="'+ses.ts+'">Elimina</button>' +
+            '</div>';
+        } else {
+          html += '<div class="gym-card" data-openses="'+ses.ts+'" style="border-left:3px solid '+c.main+'">' +
+            '<div style="display:flex;justify-content:space-between;align-items:flex-start">' +
+            '<div style="font-size:14px;font-weight:600">'+ses.data+(ses.durata? ' <span style="font-size:11px;color:var(--g-muted);font-weight:400">&middot; \u23F1 '+formatDuration(ses.durata*1000)+'</span>':'')+'</div>' +
+            '<i data-delses="'+ses.ts+'" aria-label="Elimina sessione" style="color:var(--g-muted);font-size:15px;cursor:pointer">\u2715</i></div>' +
+            '<div style="font-size:12px;color:var(--g-text2)">'+ses.esercizi.length+' esercizi &middot; '+totReps+' reps/sec totali</div>' +
+            (note ? '<div class="gym-note-badge">'+note+'</div>' : '') +
+            '</div>';
+        }
+      });
+    }
+    html += '<div class="gym-footer" style="gap:8px"><button class="gym-btn" id="trendBtn">Vedi trend</button><button class="gym-btn" id="toDash">Dashboard</button></div>';
+    r.innerHTML = html;
+    document.getElementById('back').onclick = ()=>{ goBack(); };
+    document.getElementById('toDash').onclick = ()=>{ pushView({page:'dashboard'}); };
+    document.getElementById('trendBtn').onclick = ()=>{ pushView({page:'trend', id:s.id}); };
+    r.querySelectorAll('[data-openses]').forEach(el=>el.onclick=()=>{
+      pushView({page:'sessionDetail', id:s.id, sessTs:Number(el.getAttribute('data-openses'))});
+    });
+    r.querySelectorAll('[data-delses]').forEach(el=>el.onclick=(e)=>{
+      e.stopPropagation();
+      pendingDel = Number(el.getAttribute('data-delses'));
+      draw();
+    });
+    const cancelBtn = r.querySelector('[data-canceldel]');
+    if(cancelBtn) cancelBtn.onclick = ()=>{ pendingDel = null; draw(); };
+    const confirmBtn = r.querySelector('[data-confirmdel]');
+    if(confirmBtn) confirmBtn.onclick = ()=>{
+      const t = Number(confirmBtn.getAttribute('data-confirmdel'));
+      sessioni = sessioni.filter(x=>!(x.sid===s.id && x.ts===t));
+      saveSessioni();
+      deleteSessioneFromDb(t);
+      pendingDel = null;
+      draw();
+    };
+  }
+  draw();
+}
+
+function renderSessionDetail(r){
+  const s = schede.find(x=>x.id===view.id);
+  if(!s){ view={page:'dashboard'}; return render(); }
+  const ses = sessioni.find(x=>x.sid===view.id && x.ts===view.sessTs);
+  if(!ses){ view={page:'storico', id:s.id}; return render(); }
+  const c = COLORS[s.color||0];
+  let confirmDel = false;
+
+  function draw(){
+    let html = '<div class="gym-topbar"><i id="back" aria-label="Indietro">\u2190</i><div class="gym-title" style="color:'+c.main+'">'+esc(ses.data)+'</div>' +
+      '<i id="saveImg" aria-label="Salva come immagine" style="color:var(--g-muted);font-size:16px;cursor:pointer">\u2913</i>' +
+      '<i id="delSes" aria-label="Elimina sessione" style="color:var(--g-muted);font-size:17px;cursor:pointer">\u2715</i></div>';
+    if(confirmDel){
+      html += '<div style="background:#2a1414;border:1px solid #501313;border-radius:8px;padding:12px;margin-bottom:16px">' +
+        '<div style="font-size:13px;margin-bottom:8px">Eliminare questa sessione? Non si può annullare.</div>' +
+        '<button class="gym-btn" id="cancelDel">Annulla</button> <button class="gym-btn gym-btn-danger" id="confirmDel">Elimina</button>' +
+        '</div>';
+    }
+    html += '<div id="captureArea" style="background:var(--g-bg);padding:2px">';
+    html += '<div style="font-size:16px;font-weight:700;color:'+c.main+';margin-bottom:2px">'+esc(s.nome)+'</div>';
+    html += '<div style="font-size:12px;color:var(--g-text2);margin-bottom:14px">'+esc(ses.data)+(ses.durata? ' &middot; \u23F1 '+formatDuration(ses.durata*1000):'')+' &middot; Pump App</div>';
+    ses.esercizi.forEach(ex=>{
+      const u = unitLabel(ex.tipo);
+      html += '<div style="margin-bottom:16px"><div style="font-size:14px;font-weight:600;margin-bottom:6px">'+esc(ex.nome)+'</div>';
+      html += '<div>';
+      ex.serie_log.forEach((v,i)=>{
+        const slot = normSlot(v);
+        const hasVal = slot.rep!=='' || slot.kg!=='';
+        const label = hasVal
+          ? (slot.kg!==''? esc(slot.kg)+'kg &middot; ' : '') + (slot.rep!=='' ? esc(slot.rep)+u : '&mdash;')
+          : '&mdash;';
+        html += '<span class="gym-setpill" style="border-color:'+c.main+'55"><b>S'+(i+1)+'</b> '+label+'</span>';
+      });
+      html += '</div>';
+      if(ex.nota && ex.nota.trim()!==''){
+        html += '<div class="gym-note-badge" style="margin-top:6px">'+esc(ex.nota)+'</div>';
+      }
+      html += '</div>';
+    });
+    html += '</div>';
+    html += '<div id="saveImgMsg" style="font-size:12px;color:#5DCAA5;margin:6px 0"></div>';
+    html += '<div class="gym-footer"><button class="gym-btn" id="toStorico">Torna alle sessioni</button></div>';
+    r.innerHTML = html;
+    document.getElementById('back').onclick = ()=>{ goBack(); };
+    document.getElementById('toStorico').onclick = ()=>{ goBack(); };
+    document.getElementById('delSes').onclick = ()=>{ confirmDel = true; draw(); };
+    document.getElementById('saveImg').onclick = async ()=>{
+      const msg = document.getElementById('saveImgMsg');
+      msg.style.color='#aaa';
+      msg.textContent = 'Genero immagine...';
+      let downloads;
+      try{ downloads = await claude.use('downloads'); }catch(e){ downloads = null; }
+      if(!downloads){
+        msg.style.color='#E24B4A';
+        msg.textContent = 'Salvataggio file non disponibile in questa visualizzazione.';
+        return;
+      }
+      try{
+        const canvas = buildSessionImage(s, ses, c.main);
+        const blob = await new Promise(resolve=>canvas.toBlob(resolve, 'image/png'));
+        const safeName = (s.nome+'-'+ses.data).replace(/[^a-z0-9]+/gi,'-').toLowerCase();
+        await downloads.save({filename: 'pump-app-'+safeName+'.png', data: blob});
+        msg.style.color='#5DCAA5';
+        msg.textContent = 'Immagine salvata.';
+      }catch(err){
+        msg.style.color='#E24B4A';
+        if(err && err.code==='declined') msg.textContent = 'Salvataggio annullato.';
+        else if(err && err.code==='rate_limited') msg.textContent = 'Riprova tra un istante.';
+        else msg.textContent = 'Errore durante il salvataggio dell immagine.';
+      }
+    };
+    const cancelBtn = document.getElementById('cancelDel');
+    if(cancelBtn) cancelBtn.onclick = ()=>{ confirmDel = false; draw(); };
+    const confirmBtn = document.getElementById('confirmDel');
+    if(confirmBtn) confirmBtn.onclick = ()=>{
+      sessioni = sessioni.filter(x=>!(x.sid===s.id && x.ts===ses.ts));
+      saveSessioni();
+      deleteSessioneFromDb(ses.ts);
+      goBack();
+    };
+  }
+  draw();
+}
+
+
+function renderTrend(r){
+  const s = schede.find(x=>x.id===view.id);
+  if(!s){ view={page:'dashboard'}; return render(); }
+  const c = COLORS[s.color||0];
+  const mie = sessioni.filter(x=>x.sid===s.id).slice().sort((a,b)=>a.ts-b.ts);
+  let html = '<div class="gym-topbar"><i class="" id="back" aria-label="Indietro">←</i><div class="gym-title" style="color:'+c.main+'">Trend: '+esc(s.nome)+'</div></div>';
+  if(mie.length<2){
+    html += '<div class="gym-empty"><p>Servono almeno 2 sessioni per vedere il trend</p></div>';
+    html += '<div class="gym-footer"><button class="gym-btn" id="toDash">Dashboard</button></div>';
+    r.innerHTML = html;
+    document.getElementById('back').onclick = ()=>{ goBack(); };
+    document.getElementById('toDash').onclick = ()=>{ pushView({page:'dashboard'}); };
+    return;
+  }
+  html += '<div style="display:flex;gap:14px;font-size:11px;color:var(--g-text2);margin-bottom:6px">' +
+    '<span><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:'+KG_COLOR+';margin-right:5px"></span>Peso (kg)</span>' +
+    '<span><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:'+REPS_COLOR+';margin-right:5px"></span>Reps/tempo</span></div>';
+  s.esercizi.forEach((ex,i)=>{
+    const u = unitLabel(ex.tipo);
+    html += '<div style="font-size:13px;font-weight:600;margin:16px 0 4px">'+esc(ex.nome)+'</div>';
+    html += '<div style="font-size:10px;color:var(--g-muted);margin-bottom:4px">media per sessione &middot; kg</div>';
+    html += '<div style="position:relative;height:150px;margin-bottom:6px"><canvas id="chartKg'+i+'" role="img" aria-label="Andamento peso medio per '+esc(ex.nome)+'"></canvas></div>';
+    html += '<div style="font-size:10px;color:var(--g-muted);margin-bottom:4px">media per sessione &middot; '+u+'</div>';
+    html += '<div style="position:relative;height:150px;margin-bottom:14px"><canvas id="chartReps'+i+'" role="img" aria-label="Andamento '+u+' medi per '+esc(ex.nome)+'"></canvas></div>';
+  });
+  html += '<div class="gym-footer"><button class="gym-btn" id="toDash">Dashboard</button></div>';
+  r.innerHTML = html;
+  document.getElementById('back').onclick = ()=>{ goBack(); };
+  document.getElementById('toDash').onclick = ()=>{ pushView({page:'dashboard'}); };
+
+  s.esercizi.forEach((ex,i)=>{
+    const labels = [];
+    const repsData = [];
+    const kgData = [];
+    mie.forEach(ses=>{
+      const found = ses.esercizi.find(e=>e.nome===ex.nome);
+      if(found){
+        const slots = found.serie_log.map(v=>normSlot(v));
+        const repVals = slots.map(v=>Number(v.rep)).filter(v=>!isNaN(v) && v>0);
+        const kgVals = slots.map(v=>Number(v.kg)).filter(v=>!isNaN(v) && v>0);
+        if(repVals.length>0 || kgVals.length>0){
+          labels.push(ses.data);
+          repsData.push(repVals.length? Math.round((repVals.reduce((a,b)=>a+b,0)/repVals.length)*10)/10 : null);
+          kgData.push(kgVals.length? Math.round((kgVals.reduce((a,b)=>a+b,0)/kgVals.length)*10)/10 : null);
+        }
+      }
+    });
+    const baseOpts = {
+      responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{
+        x:{ticks:{color:'#aaa', font:{size:9}}, grid:{color:'#333'}},
+        y:{ticks:{color:'#aaa', font:{size:9}}, grid:{color:'#333'}}
+      }
+    };
+    const ctxReps = document.getElementById('chartReps'+i);
+    if(ctxReps && labels.length>0){
+      const chart1 = new Chart(ctxReps, {
+        type:'line',
+        data:{labels, datasets:[{data:repsData, borderColor:REPS_COLOR, backgroundColor:REPS_COLOR, borderWidth:2, tension:0.3, pointRadius:4, pointStyle:'circle', spanGaps:true}]},
+        options: baseOpts
+      });
+      charts.push(chart1);
+    }
+    const ctxKg = document.getElementById('chartKg'+i);
+    if(ctxKg && labels.length>0){
+      const chart2 = new Chart(ctxKg, {
+        type:'line',
+        data:{labels, datasets:[{data:kgData, borderColor:KG_COLOR, backgroundColor:KG_COLOR, borderWidth:2, borderDash:[6,3], tension:0.3, pointRadius:4, pointStyle:'rectRot', spanGaps:true}]},
+        options: baseOpts
+      });
+      charts.push(chart2);
+    }
+  });
+}
+
+try{ history.replaceState({v:{page:'dashboard'}}, '', '#dashboard'); }catch(e){}
+load();
+})();
+</script>
+</body>
+</html>
