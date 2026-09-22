@@ -81,7 +81,7 @@ function ts(m,d){ return Date.UTC(2026, m-1, d); }
 function ds(d,mon){ return d+' '+mon+' 2026'; }
 const REPS_COLOR = '#3987e5';
 const KG_COLOR = '#d95926';
-const APP_VERSION = 'v2.2 \u00b7 19 set 2026';
+const APP_VERSION = 'v2.5 \u00b7 22 set 2026';
 
 const IMPORT_TEMPLATE = {
   schede: [
@@ -3439,6 +3439,15 @@ function renderDetail(r){
   function draw(){
     let html = '<div class="gym-topbar"><i class="" id="back" aria-label="Indietro">←</i><div class="gym-title" style="color:'+c.main+'">'+esc(s.nome)+'</div>' +
       '<i class="" data-trendbtn="1" aria-label="Vedi trend" style="color:'+c.main+'">↗</i></div>';
+    const inProg = loadInProgress();
+    const hasInProg = !!(inProg && inProg.schedaId===s.id);
+    if(hasInProg){
+      html += '<div class="gym-card" style="border-left:3px solid #EF9F27;background:rgba(239,159,39,0.08);cursor:default;margin-bottom:12px">' +
+        '<div style="font-size:13px;font-weight:600;color:#EF9F27">Sessione in corso</div>' +
+        '<div style="font-size:13px;margin:4px 0">\u23F1 '+formatDuration(Date.now()-inProg.sessionStartTs)+'</div>' +
+        '<button class="gym-btn" id="discardSessDetail">Scarta</button>' +
+        '</div>';
+    }
     html += '<div style="margin-bottom:10px">' + s.giorni.map(d=>'<span class="gym-chip" style="background:'+c.bg+';color:'+c.main+'">'+d+'</span>').join('') + '</div>';
     html += '<div style="font-size:11px;color:var(--g-muted);margin-bottom:4px">Trascina per riordinare</div>';
     s.esercizi.forEach((ex,i)=>{
@@ -3462,7 +3471,7 @@ function renderDetail(r){
       html += '<button class="gym-fab gym-fab-small" style="background:'+c.main+';margin:12px 0" id="addEx" aria-label="Aggiungi esercizio"><i class="" aria-hidden="true">+</i></button>';
     }
     html += '<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">' +
-      '<button class="gym-btn gym-btn-primary" style="background:'+c.main+'" id="allena"><i class="" aria-hidden="true">▶</i> Allena</button>' +
+      '<button class="gym-btn gym-btn-primary" style="background:'+c.main+'" id="allena"><i class="" aria-hidden="true">▶</i> '+(hasInProg?'Riprendi':'Allena')+'</button>' +
       '<button class="gym-btn" id="modifica"><i class="" aria-hidden="true">✎</i> Modifica</button>' +
       '<button class="gym-btn" id="sessioniBtn"><i class="" aria-hidden="true">↻</i> Sessioni ('+nSess+')</button></div>';
     html += '<div class="gym-footer"><button class="gym-btn" id="toDash">Dashboard</button></div>';
@@ -3478,6 +3487,8 @@ function renderDetail(r){
     document.getElementById('back').onclick = ()=>{ goBack(); };
     document.getElementById('toDash').onclick = ()=>{ pushView({page:'dashboard'}); };
     document.getElementById('allena').onclick = ()=>{ pushView({page:'session', id:s.id}); };
+    const discardBtnD = document.getElementById('discardSessDetail');
+    if(discardBtnD) discardBtnD.onclick = ()=>{ clearInProgress(); draw(); };
     document.getElementById('modifica').onclick = ()=>{ pushView({page:'editor', mode:'edit', id:s.id}); };
     document.getElementById('sessioniBtn').onclick = ()=>{ pushView({page:'storico', id:s.id}); };
     const trendBtnTop = r.querySelector('[data-trendbtn]');
@@ -3570,6 +3581,7 @@ function renderSession(r){
     };
   });
   const sessionStartTs = resuming ? saved.sessionStartTs : Date.now();
+  if(!resuming) saveInProgress(s.id, sessionStartTs, log);
   let timerInterval = setInterval(()=>{
     const el = document.getElementById('sessTimer');
     if(el) el.textContent = formatDuration(Date.now()-sessionStartTs);
