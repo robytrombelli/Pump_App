@@ -1,0 +1,8 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "io.github.robytrombelli.pumpapp",
+    "sha256_cert_fingerprints": ["7E:CC:BD:98:A4:F1:04:DA:74:7E:38:D0:7B:11:49:07:AC:B7:85:C2:C8:4E:DE:03:5D:52:11:F8:81:4B:AA:76"]
+  }
+}]
